@@ -12,7 +12,7 @@ export default function Footer() {
           {/* Brand Information (Takes up 4 cols) */}
           <div className="lg:col-span-4 space-y-6">
             <Link to="/" className="inline-flex items-center gap-2 text-xl font-bold uppercase tracking-tighter">
-              <img src="/assets/desktop.png" alt="CITYFASHION MADDUR" className="h-20 w-20 rounded bg-slate-100 object-contain" />
+              <img src="https://files.cityfashionmaddur.com/assests/desktop.png" alt="CITYFASHION MADDUR" className="h-20 w-20 rounded bg-slate-100 object-contain" />
               <span>CITY FASHION MADDUR</span>
             </Link>
             <p className="text-slate-500 leading-relaxed max-w-sm">

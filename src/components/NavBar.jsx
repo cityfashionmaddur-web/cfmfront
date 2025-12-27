@@ -91,7 +91,7 @@ export default function NavBar() {
 
               <Link to="/" className="flex items-center text-slate-900 font-sans">
                 <img
-                  src="/assets/desktop.png"
+                  src="https://files.cityfashionmaddur.com/assests/desktop.png"
                   alt="CITY FASHION MADDUR"
                   className="h-10 w-10 object-contain"
                 />
