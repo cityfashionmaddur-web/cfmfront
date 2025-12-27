@@ -29,8 +29,6 @@ export default function Footer() {
               <ul className="space-y-4 text-sm text-slate-600">
                 <li><Link to="/products?sort=newest" className="hover:text-slate-900 transition-colors">New Arrivals</Link></li>
                 <li><Link to="/categories/men" className="hover:text-slate-900 transition-colors">Men</Link></li>
-                <li><Link to="/categories/women" className="hover:text-slate-900 transition-colors">Women</Link></li>
-                <li><Link to="/categories/accessories" className="hover:text-slate-900 transition-colors">Accessories</Link></li>
               </ul>
             </div>
 
@@ -40,7 +38,6 @@ export default function Footer() {
               <ul className="space-y-4 text-sm text-slate-600">
                 <li><Link to="/orders" className="hover:text-slate-900 transition-colors">Order Status</Link></li>
                 <li><Link to="/shipping" className="hover:text-slate-900 transition-colors">Shipping & Delivery</Link></li>
-                <li><Link to="/returns" className="hover:text-slate-900 transition-colors">Returns</Link></li>
                 <li><Link to="/faq" className="hover:text-slate-900 transition-colors">FAQ</Link></li>
               </ul>
             </div>
@@ -50,7 +47,6 @@ export default function Footer() {
               <h4 className="font-bold text-xs uppercase tracking-widest mb-6 text-slate-900">Company</h4>
               <ul className="space-y-4 text-sm text-slate-600">
                 <li><Link to="/about" className="hover:text-slate-900 transition-colors">About Us</Link></li>
-                <li><Link to="/sustainability" className="hover:text-slate-900 transition-colors">Sustainability</Link></li>
                 <li><Link to="/contact" className="hover:text-slate-900 transition-colors">Contact</Link></li>
                 <li><Link to="/terms" className="hover:text-slate-900 transition-colors">Terms</Link></li>
                 <li><Link to="/policy" className="hover:text-slate-900 transition-colors">Privacy Policy</Link></li>

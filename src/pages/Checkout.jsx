@@ -382,23 +382,6 @@ export default function Checkout() {
 
         <aside className="space-y-4 rounded-3xl border border-slate-200 bg-white/95 p-6 shadow-lg lg:sticky lg:top-24">
           <h2 className="text-lg font-semibold text-slate-900">Order summary</h2>
-          <div className="space-y-2 rounded-2xl border border-slate-200 bg-slate-50 p-4">
-            <div className="flex items-center justify-between text-sm text-slate-700">
-              <span className="font-semibold text-slate-900">
-                {freeShipRemaining === 0 ? "Free delivery unlocked" : "Free delivery progress"}
-              </span>
-              <span className="text-xs text-slate-600">
-                {freeShipRemaining === 0 ? "₹0 left" : `${formatPrice(freeShipRemaining)} to go`}
-              </span>
-            </div>
-            <div className="h-2 rounded-full bg-slate-200">
-              <div
-                className="h-2 rounded-full bg-slate-900 transition-all"
-                style={{ width: `${freeShipProgress}%` }}
-              />
-            </div>
-            <p className="text-xs text-slate-600">Delivery fee waives at ₹{FREE_SHIP}. A little extra unlocks free delivery.</p>
-          </div>
           <div className="space-y-2 rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-700">
             <div className="flex items-center justify-between">
               <span>Subtotal</span>

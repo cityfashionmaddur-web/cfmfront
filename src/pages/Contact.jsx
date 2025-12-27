@@ -47,7 +47,7 @@ export default function Contact() {
           <h2 className="text-lg font-semibold text-slate-900">Support hours</h2>
           <p className="text-sm text-slate-600">Monday–Friday, 9am–6pm IST. We reply within one business day.</p>
           <div className="space-y-2 text-sm text-slate-700">
-            <p><span className="font-semibold text-slate-900">Email:</span> support@cityfashionmaddur.com</p>
+            <p><span className="font-semibold text-slate-900">Email:</span> info@cityfashionmaddur.com</p>
             <p><span className="font-semibold text-slate-900">Phone:</span> +91 90000 00000</p>
             <p><span className="font-semibold text-slate-900">Address:</span> 21 Market Street, Mumbai</p>
           </div>
