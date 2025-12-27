@@ -13,7 +13,7 @@ export default function Footer() {
           <div className="lg:col-span-4 space-y-6">
             <Link to="/" className="inline-flex items-center gap-2 text-xl font-bold uppercase tracking-tighter">
               <img src="/assets/desktop.png" alt="CITYFASHION MADDUR" className="h-20 w-20 rounded bg-slate-100 object-contain" />
-              <span>CITYFASHION MADDUR</span>
+              <span>CITY FASHION MADDUR</span>
             </Link>
             <p className="text-slate-500 leading-relaxed max-w-sm">
               Curated silhouettes and modern essentials for the city wardrobe. Designed for the contemporary minimalist.

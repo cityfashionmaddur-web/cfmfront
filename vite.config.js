@@ -5,7 +5,7 @@ export default defineConfig(({ mode }) => {
   const target = env.VITE_API_URL || "http://localhost:4000";
 
   return {
-    server: {
+  server: {
       proxy: {
         "/api": {
           target,

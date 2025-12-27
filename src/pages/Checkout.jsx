@@ -32,10 +32,6 @@ export default function Checkout() {
   const { isAuthenticated, user } = useAuth();
   const [formState, setFormState] = useState(emptyForm);
   const [status, setStatus] = useState({ loading: false, error: "", success: "" });
-  const FREE_SHIP = 2500;
-  const freeShipRemaining = Math.max(FREE_SHIP - subtotal, 0);
-  const freeShipProgress = Math.min((subtotal / FREE_SHIP) * 100, 100);
-
   const updateField = (key, value) => {
     setFormState((prev) => ({ ...prev, [key]: value }));
   };
@@ -202,12 +198,6 @@ export default function Checkout() {
     );
   }
 
-  const steps = [
-    { label: "Bag", state: items.length ? "current" : "locked" },
-    { label: "Delivery", state: items.length ? "upcoming" : "locked" },
-    { label: "Payment", state: items.length ? "locked" : "locked" }
-  ];
-
   return (
     <div className="space-y-8 pt-12">
       <div className="rounded-3xl border border-slate-200 bg-white/90 p-6 shadow-sm">
@@ -226,21 +216,20 @@ export default function Checkout() {
           </div>
         </div>
         <div className="mt-4 flex flex-wrap items-center gap-3 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-700">
-          {steps.map((step, idx) => (
-            <React.Fragment key={step.label}>
-              <span
-                className={`flex h-8 w-8 items-center justify-center rounded-full border text-xs ${
-                  step.state === "current"
-                    ? "border-slate-900 bg-slate-900 text-white"
-                    : "border-slate-200 bg-white text-slate-500"
-                }`}
-              >
-                {idx + 1}
-              </span>
-              <span className={step.state === "current" ? "text-slate-900" : "text-slate-500"}>{step.label}</span>
-              {idx < steps.length - 1 && <span className="mx-2 h-px w-8 bg-slate-200" />}
-            </React.Fragment>
-          ))}
+          <span className="flex h-8 w-8 items-center justify-center rounded-full border border-slate-900 bg-slate-900 text-white text-xs">
+            1
+          </span>
+          <span className="text-slate-900">Bag</span>
+          <span className="mx-2 h-px w-8 bg-slate-200" />
+          <span className="flex h-8 w-8 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-500 text-xs">
+            2
+          </span>
+          <span className="text-slate-500">Payment</span>
+          <span className="mx-2 h-px w-8 bg-slate-200" />
+          <span className="flex h-8 w-8 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-500 text-xs">
+            3
+          </span>
+          <span className="text-slate-500">Checkout</span>
         </div>
       </div>
 

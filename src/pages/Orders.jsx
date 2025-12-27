@@ -5,7 +5,7 @@ import { useAuth } from "../context/AuthContext.jsx";
 import { formatDate, formatPrice } from "../utils/format.js";
 
 export default function Orders() {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, user } = useAuth();
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -53,6 +53,7 @@ export default function Orders() {
         <div>
           <h1 className="text-3xl font-semibold">Your Orders</h1>
           <p className="text-slate-600">Track the status of every purchase.</p>
+          {user?.name && <p className="text-sm text-slate-500">Signed in as {user.name}</p>}
         </div>
       </section>
 

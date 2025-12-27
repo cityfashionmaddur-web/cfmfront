@@ -188,7 +188,7 @@ export default function AdminOrderDetail() {
                 />
                 <input
                   className="input"
-                  placeholder="Carrier (optional)"
+                  placeholder="Carrier (e.g., Bluedart, Delhivery)"
                   value={trackingDraft.trackingCarrier}
                   onChange={(e) => setTrackingDraft((prev) => ({ ...prev, trackingCarrier: e.target.value }))}
                 />
@@ -200,6 +200,7 @@ export default function AdminOrderDetail() {
 
             <div className="admin-address">
               <h3>Shipping address</h3>
+              {order.user?.name && <p className="font-semibold text-slate-900">{order.user.name}</p>}
               <p>{order.addressLine1 || "-"}</p>
               {order.addressLine2 && <p>{order.addressLine2}</p>}
               <p>{[order.city, order.state, order.postalCode].filter(Boolean).join(", ")}</p>

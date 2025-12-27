@@ -56,12 +56,11 @@ export default function NavBar() {
     return () => document.removeEventListener("mousedown", onDocClick);
   }, []);
 
-  const bgClass =
-    "bg-gradient-to-b from-slate-900/90 via-slate-800/80 to-slate-900/90 backdrop-blur border-b border-white/10";
+  const bgClass = "bg-white/95 backdrop-blur border-b border-slate-200 shadow-sm";
 
   const desktopLinkClass = ({ isActive }) =>
-    `text-sm font-semibold transition-colors ${
-      isActive ? "text-white" : "text-white/70 hover:text-white"
+    `text-xs sm:text-sm font-semibold transition-colors ${
+      isActive ? "text-slate-900" : "text-slate-500 hover:text-slate-900"
     }`;
 
   const initials = user?.name
@@ -84,20 +83,20 @@ export default function NavBar() {
             <div className="flex items-center gap-3">
               <button
                 onClick={() => setOpen((v) => !v)}
-                className="md:hidden p-2 -ml-2 rounded-lg bg-white/10 text-white transition hover:bg-white/15"
+                className="md:hidden p-2 -ml-2 rounded-lg bg-slate-100 text-slate-900 transition hover:bg-slate-200"
                 aria-label="Toggle menu"
               >
                 {open ? <CloseIcon /> : <MenuIcon />}
               </button>
 
-              <Link to="/" className="flex items-center text-white">
+              <Link to="/" className="flex items-center text-slate-900 font-sans">
                 <img
                   src="/assets/desktop.png"
-                  alt="CITYFASHION MADDUR"
-                  className="h-24 w-24 object-contain drop-shadow"
+                  alt="CITY FASHION MADDUR"
+                  className="h-10 w-10 object-contain"
                 />
-                <span className="text-base md:text-xl font-bold tracking-wide uppercase">
-                  CITYFASHION MADDUR
+                <span className="pl-2 text-xs sm:text-sm md:text-base font-semibold tracking-wide uppercase leading-tight">
+                  CITY FASHION MADDUR
                 </span>
               </Link>
             </div>
@@ -119,9 +118,9 @@ export default function NavBar() {
                     <button
                       type="button"
                       onClick={() => setProfileMenuOpen((v) => !v)}
-                      className="flex items-center gap-2 rounded-full border border-white/30 bg-white/10 px-3 py-1.5 text-xs font-semibold text-white transition hover:border-white hover:bg-white/15"
+                      className="flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-900 transition hover:border-slate-300 hover:bg-slate-50"
                     >
-                      <span className="grid h-7 w-7 place-items-center rounded-full bg-white/15 text-[11px] font-bold uppercase">
+                      <span className="grid h-7 w-7 place-items-center rounded-full bg-slate-100 text-[11px] font-bold uppercase">
                         {initials || "U"}
                       </span>
                       <span>{user?.name ? user.name.split(" ")[0] : "Profile"}</span>
@@ -131,9 +130,9 @@ export default function NavBar() {
                     </button>
 
                     {profileMenuOpen && (
-                      <div className="absolute right-0 mt-2 w-44 overflow-hidden rounded-xl border border-white/15 bg-white text-slate-900 shadow-2xl">
+                      <div className="absolute right-0 mt-2 w-44 overflow-hidden rounded-xl border border-slate-200 bg-white text-slate-900 shadow-2xl">
                         <Link to="/profile" className="block px-4 py-3 text-sm font-semibold hover:bg-slate-50">
-                          User data
+                          Profile
                         </Link>
                         <Link to="/orders" className="block px-4 py-3 text-sm font-semibold hover:bg-slate-50 border-t border-slate-100">
                           Orders
@@ -145,20 +144,20 @@ export default function NavBar() {
                   <button
                     type="button"
                     onClick={logout}
-                    className="hidden md:inline-flex rounded-full border border-white/30 bg-white/10 px-3 py-1.5 text-xs font-semibold text-white transition hover:border-white hover:bg-white/15"
+                    className="hidden md:inline-flex rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-900 transition hover:border-slate-300 hover:bg-slate-50"
                   >
                     Sign out
                   </button>
                 </>
               ) : (
-                <Link to="/login" className="hidden md:inline-flex text-sm font-semibold text-white hover:text-white/80">
+                <Link to="/login" className="hidden md:inline-flex text-sm font-semibold text-slate-900 hover:text-slate-700">
                   Sign in
                 </Link>
               )}
 
               <Link
                 to="/cart"
-                className="relative rounded-full border border-white/30 px-3 py-2 text-white transition hover:border-white hover:bg-white/5"
+                className="relative rounded-full border border-slate-200 px-3 py-2 text-slate-900 transition hover:border-slate-900 hover:bg-slate-50"
                 aria-label="Cart"
               >
                 <div className="flex items-center gap-2">
@@ -178,7 +177,7 @@ export default function NavBar() {
 
       {/* Mobile Menu */}
       <div
-        className={`fixed inset-0 z-40 md:hidden pt-20 bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900 text-white transition-transform duration-500 ${
+        className={`fixed inset-0 z-40 md:hidden pt-20 bg-white text-slate-900 transition-transform duration-500 ${
           open ? "translate-x-0" : "-translate-x-full"
         }`}
       >
@@ -189,7 +188,7 @@ export default function NavBar() {
               to={link.to}
               className={({ isActive }) =>
                 `text-3xl font-light tracking-tight ${
-                  isActive ? "text-white font-medium border-l-4 border-white pl-4" : "text-white/60"
+                  isActive ? "text-slate-900 font-medium border-l-4 border-slate-900 pl-4" : "text-slate-500"
                 }`
               }
             >
@@ -201,25 +200,25 @@ export default function NavBar() {
         <div className="mt-10 px-8 space-y-3">
           {isAuthenticated ? (
             <>
-              <div className="rounded-2xl border border-white/10 bg-white/5 p-4 space-y-3">
-                <p className="text-sm font-semibold text-white">Account</p>
-                <Link to="/profile" className="block text-base font-semibold text-white">
-                  User data
+              <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 space-y-3">
+                <p className="text-sm font-semibold text-slate-900">Account</p>
+                <Link to="/profile" className="block text-base font-semibold text-slate-900">
+                  Profile
                 </Link>
-                <Link to="/orders" className="block text-base font-semibold text-white">
+                <Link to="/orders" className="block text-base font-semibold text-slate-900">
                   Orders
                 </Link>
               </div>
               <button
                 type="button"
                 onClick={logout}
-                className="text-sm font-semibold text-white/80 underline underline-offset-4"
+                className="text-sm font-semibold text-slate-700 underline underline-offset-4"
               >
                 Sign out
               </button>
             </>
           ) : (
-            <Link to="/login" className="text-base font-semibold text-white">
+            <Link to="/login" className="text-base font-semibold text-slate-900">
               Sign in
             </Link>
           )}

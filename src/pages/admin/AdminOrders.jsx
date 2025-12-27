@@ -240,7 +240,13 @@ export default function AdminOrders() {
                       </span>
                     </td>
                     <td className="text-xs text-slate-700">
-                      <div className="flex flex-col gap-2">
+                      <div className="flex flex-col gap-2 rounded-xl border border-slate-200 bg-white/80 p-3">
+                        <div className="flex items-center justify-between gap-2">
+                          <span className="text-[11px] font-semibold text-slate-500 uppercase tracking-[0.12em]">Tracking</span>
+                          {(order.trackingCode || order.trackingCarrier) && (
+                            <span className="text-[11px] text-emerald-600 font-semibold">Saved</span>
+                          )}
+                        </div>
                         <input
                           className="input"
                           placeholder="Tracking code"
@@ -249,20 +255,23 @@ export default function AdminOrders() {
                         />
                         <input
                           className="input"
-                          placeholder="Carrier (optional)"
+                          placeholder="Carrier (e.g., Bluedart, Delhivery)"
                           value={draftTracking[order.id]?.trackingCarrier || ""}
                           onChange={(e) => handleTrackingChange(order.id, "trackingCarrier", e.target.value)}
                         />
-                        <button
-                          className="btn btn-ghost"
-                          type="button"
-                          onClick={() => handleSaveTracking(order)}
-                          disabled={status.savingTrackingId === order.id}
-                        >
-                          {status.savingTrackingId === order.id ? "Saving..." : "Save"}
-                        </button>
+                        <div className="flex items-center justify-between text-[11px] text-slate-500">
+                          <span>Visible to customer on Orders</span>
+                          <button
+                            className="btn btn-ghost btn-sm"
+                            type="button"
+                            onClick={() => handleSaveTracking(order)}
+                            disabled={status.savingTrackingId === order.id}
+                          >
+                            {status.savingTrackingId === order.id ? "Saving..." : "Save"}
+                          </button>
+                        </div>
                         {(order.trackingCode || order.trackingCarrier) && (
-                          <div className="rounded bg-slate-100 px-2 py-1 text-[11px] text-slate-600">
+                          <div className="rounded-lg border border-slate-100 bg-slate-50 px-2 py-1 text-[11px] text-slate-700">
                             {order.trackingCode} {order.trackingCarrier ? `(${order.trackingCarrier})` : ""}
                           </div>
                         )}
