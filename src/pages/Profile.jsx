@@ -319,7 +319,7 @@ export default function Profile() {
         )}
 
         <form className="px-6 py-6" onSubmit={handleSubmit}>
-          {status.error && (
+          {status.error && !status.error.includes("API error (401)") && (
             <div className="mb-5 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
               {status.error}
             </div>
