@@ -69,6 +69,17 @@ export function AuthProvider({ children }) {
   }, [session?.token, session?.user]);
 
   const login = (payload) => {
+    if (typeof window !== "undefined") {
+      try {
+        if (payload?.token) {
+          window.localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
+        } else {
+          window.localStorage.removeItem(STORAGE_KEY);
+        }
+      } catch (err) {
+        console.error("Failed to persist auth session", err);
+      }
+    }
     setSession(payload);
   };
 
