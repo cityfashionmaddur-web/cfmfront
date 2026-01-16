@@ -11,7 +11,6 @@ import "./styles/global.css";
 import "../assets/favicon.png";
 
 ReactDOM.createRoot(document.getElementById("root")).render(
-  <React.StrictMode>
     <BrowserRouter>
       <HelmetProvider>
         <ToastProvider>
@@ -25,5 +24,4 @@ ReactDOM.createRoot(document.getElementById("root")).render(
         </ToastProvider>
       </HelmetProvider>
     </BrowserRouter>
-  </React.StrictMode>
 );
