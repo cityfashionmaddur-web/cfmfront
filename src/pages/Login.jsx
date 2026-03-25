@@ -32,9 +32,14 @@ export default function Login() {
     }
   }, [oauthError, navigate]);
 
-  // Handle Google Redirect
   const handleGoogleLogin = () => {
     setLoading(true);
+    const returnTo = new URLSearchParams(search).get("returnTo");
+    if (returnTo) {
+      sessionStorage.setItem("returnTo", returnTo);
+    } else {
+      sessionStorage.removeItem("returnTo");
+    }
     const redirectUrl = `${window.location.origin}/oauth/callback`;
     const url = new URL(`${API_BASE}/auth/google/redirect`);
     url.searchParams.set("redirect", redirectUrl);

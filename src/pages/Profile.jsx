@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { apiGet, apiPut } from "../utils/api.js";
 import { useAuth } from "../context/AuthContext.jsx";
+import { User, MapPin, Phone, Mail, ShieldCheck, Loader2 } from "lucide-react";
 
 const emptyProfile = {
   name: "",
@@ -62,32 +63,28 @@ function validate(form) {
   return errors;
 }
 
-const Field = ({ label, hint, error, children, footer }) => {
+const Field = ({ label, hint, error, children, footer, icon: Icon }) => {
   return (
-    <div className="flex flex-col gap-1.5">
+    <div className="flex flex-col gap-1.5 focus-within:text-slate-900 text-slate-700 transition-colors">
       <div className="flex items-end justify-between gap-2">
-        <label className="text-sm font-medium text-slate-800">{label}</label>
-        {hint ? <span className="text-xs text-slate-500">{hint}</span> : null}
+        <label className="text-sm font-semibold flex items-center gap-2">
+          {Icon && <Icon className="w-4 h-4 text-slate-400" />}
+          {label}
+        </label>
+        {hint && <span className="text-[11px] font-medium uppercase tracking-wider text-slate-400">{hint}</span>}
       </div>
       {children}
-      {error ? <p className="text-xs text-rose-600">{error}</p> : null}
-      {footer ? <div className="text-xs text-slate-500">{footer}</div> : null}
+      {error && <p className="text-xs font-medium text-rose-500 mt-1">{error}</p>}
+      {footer && <div className="text-xs text-slate-500 mt-1">{footer}</div>}
     </div>
   );
 };
 
 export default function Profile() {
   const { isAuthenticated, updateUser } = useAuth();
-
   const [profile, setProfile] = useState(null);
   const [formState, setFormState] = useState(emptyProfile);
-
-  const [status, setStatus] = useState({
-    loading: false,
-    error: "",
-    success: ""
-  });
-
+  const [status, setStatus] = useState({ loading: false, error: "", success: "" });
   const [initialLoading, setInitialLoading] = useState(false);
   const [touched, setTouched] = useState({});
   const [submitted, setSubmitted] = useState(false);
@@ -98,25 +95,18 @@ export default function Profile() {
   const pinLastRef = useRef("");
 
   const errors = useMemo(() => validate(formState), [formState]);
-
-  const visibleError = (field) => {
-    if (!submitted && !touched[field]) return "";
-    return errors[field] || "";
-  };
+  const visibleError = (field) => (!submitted && !touched[field] ? "" : errors[field] || "");
 
   useEffect(() => {
     if (!isAuthenticated) return;
-
     let active = true;
 
     async function load() {
       setStatus({ loading: true, error: "", success: "" });
       setInitialLoading(true);
-
       try {
         const data = await apiGet("/profile", { auth: true });
         if (!active) return;
-
         setProfile(data);
         setFormState({
           name: data.name || "",
@@ -132,16 +122,14 @@ export default function Profile() {
         if (!active) return;
         setStatus({ loading: false, error: err.message || "Failed to load profile.", success: "" });
       } finally {
-        if (!active) return;
-        setInitialLoading(false);
-        setStatus((prev) => ({ ...prev, loading: false }));
+        if (active) {
+          setInitialLoading(false);
+          setStatus((prev) => ({ ...prev, loading: false }));
+        }
       }
     }
-
     load();
-    return () => {
-      active = false;
-    };
+    return () => { active = false; };
   }, [isAuthenticated]);
 
   const updateField = (key, value) => {
@@ -150,53 +138,33 @@ export default function Profile() {
   };
 
   const markTouched = (key) => setTouched((prev) => ({ ...prev, [key]: true }));
-
   const canSubmit = !status.loading && Object.keys(errors).length === 0;
 
-  // --- Pincode auto-fill (India) ---
   useEffect(() => {
     const pin = (formState.postalCode || "").trim();
+    setPinStatus((prev) => ({ ...prev, filled: false, error: prev.loading ? prev.error : "" }));
 
-    // Reset small helper UI if user is editing
-    setPinStatus((prev) => ({
-      ...prev,
-      filled: false,
-      error: prev.loading ? prev.error : ""
-    }));
-
-    // Only attempt for 6-digit India pincode
     if (!isIndianPincode(pin)) {
-      // cancel any in-flight lookup
       if (pinAbortRef.current) pinAbortRef.current.abort();
       setPinStatus({ loading: false, error: "", filled: false });
       pinLastRef.current = "";
       return;
     }
 
-    // Avoid repeat lookups for same pin
     if (pinLastRef.current === pin) return;
 
-    // Debounce slightly so it feels smooth
     const t = setTimeout(async () => {
       try {
         pinLastRef.current = pin;
-
-        // Cancel previous request
         if (pinAbortRef.current) pinAbortRef.current.abort();
         const controller = new AbortController();
         pinAbortRef.current = controller;
 
         setPinStatus({ loading: true, error: "", filled: false });
 
-        const res = await fetch(`https://api.postalpincode.in/pincode/${pin}`, {
-          method: "GET",
-          signal: controller.signal
-        });
-
+        const res = await fetch(`https://api.postalpincode.in/pincode/${pin}`, { method: "GET", signal: controller.signal });
         if (!res.ok) throw new Error("Unable to lookup pincode.");
         const json = await res.json();
-
-        // India Post API returns array with { Status, PostOffice }
         const first = Array.isArray(json) ? json[0] : null;
 
         if (!first || first.Status !== "Success" || !Array.isArray(first.PostOffice) || !first.PostOffice.length) {
@@ -205,14 +173,10 @@ export default function Profile() {
         }
 
         const po = first.PostOffice[0];
-        const district = (po.District || "").trim();
-        const state = (po.State || "").trim();
-
         setFormState((prev) => ({
           ...prev,
-          city: district || prev.city,
-          state: state || prev.state,
-          // Nice default for India users
+          city: (po.District || "").trim() || prev.city,
+          state: (po.State || "").trim() || prev.state,
           country: prev.country?.trim() ? prev.country : "India"
         }));
 
@@ -233,7 +197,8 @@ export default function Profile() {
 
     const currentErrors = validate(formState);
     if (Object.keys(currentErrors).length) {
-      setStatus({ loading: false, error: "Please fix the highlighted fields.", success: "" });
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      setStatus({ loading: false, error: "Please fix the highlighted fields below.", success: "" });
       return;
     }
 
@@ -254,6 +219,7 @@ export default function Profile() {
       const updated = await apiPut("/profile", payload, { auth: true });
       setProfile(updated);
       updateUser(updated);
+      window.scrollTo({ top: 0, behavior: "smooth" });
       setStatus({ loading: false, error: "", success: "Profile updated successfully." });
     } catch (err) {
       setStatus({ loading: false, error: err.message || "Failed to update profile.", success: "" });
@@ -262,244 +228,259 @@ export default function Profile() {
 
   if (!isAuthenticated) {
     return (
-      <div className="mx-auto mt-14 max-w-xl rounded-3xl border border-slate-200 bg-white p-10 text-center shadow-sm">
-        <div className="mx-auto mb-4 grid h-12 w-12 place-items-center rounded-2xl bg-slate-900 text-white">
-          <span className="text-lg">🔒</span>
+      <div className="flex flex-col items-center justify-center min-h-[60vh] max-w-lg mx-auto text-center px-4">
+        <div className="w-20 h-20 bg-slate-100 rounded-full flex items-center justify-center mb-6 shadow-inner">
+          <ShieldCheck className="w-10 h-10 text-slate-400" />
         </div>
-        <h2 className="text-2xl font-semibold text-slate-900">Login required</h2>
-        <p className="mt-2 text-slate-600">Sign in to view and update your profile details.</p>
-        <Link
-          className="mt-6 inline-flex items-center justify-center rounded-full bg-slate-900 px-5 py-3 text-sm font-semibold text-white shadow-sm transition hover:-translate-y-0.5"
-          to="/login"
-        >
-          Go to login
+        <h2 className="text-3xl font-light text-slate-900 mb-3">Login Required</h2>
+        <p className="text-slate-600 mb-8 font-light leading-relaxed">
+          Access your personalized profile to manage order histories, delivery preferences, and account settings.
+        </p>
+        <Link className="btn-primary w-full sm:w-auto px-10" to="/login">
+          Sign In / Create Account
         </Link>
       </div>
     );
   }
 
+  if (initialLoading) {
+    return (
+        <div className="flex flex-col items-center justify-center min-h-[60vh] text-slate-400">
+            <Loader2 className="w-10 h-10 animate-spin mb-4 text-slate-300" />
+            <p className="font-light tracking-wide uppercase text-sm">Loading Account</p>
+        </div>
+    );
+  }
+
   return (
-    <div className="mx-auto w-full max-w-4xl px-4 pb-16 pt-10">
-      <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
-        <div>
-          <h1 className="text-3xl font-semibold text-slate-900">Profile</h1>
-          <p className="mt-1 text-slate-600">Keep your delivery and contact details up to date.</p>
-        </div>
-      </div>
-
-      <div className="relative overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
-        <div className="border-b border-slate-200 bg-gradient-to-b from-slate-50 to-white px-6 py-5">
-          <div className="flex flex-wrap items-center justify-between gap-4">
-            <div className="flex items-center gap-4">
-              <div className="relative grid h-14 w-14 place-items-center overflow-hidden rounded-2xl border border-slate-200 bg-white">
-                <span className="text-lg font-semibold text-slate-900">
-                  {(profile?.name || profile?.email || "U").slice(0, 2).toUpperCase()}
-                </span>
-              </div>
-
-              <div>
-                <p className="text-sm text-slate-500">Signed in as</p>
-                <p className="text-base font-semibold text-slate-900">{profile?.name || "—"}</p>
-                <p className="text-sm text-slate-600">{profile?.email || ""}</p>
-              </div>
-            </div>
-
-            <div className="text-sm text-slate-500">
-              {status.loading ? "Saving changes…" : "All changes are saved when you click Save."}
-            </div>
-          </div>
+    <div className="min-h-screen bg-slate-50 pt-10 pb-20">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        
+        {/* Header Section */}
+        <div className="mb-10 lg:pl-4">
+          <h1 className="text-3xl font-light tracking-tight text-slate-900">Account Settings</h1>
+          <p className="mt-2 text-slate-500 font-light">Manage your personal details and delivery preferences.</p>
         </div>
 
-        {initialLoading && (
-          <div className="absolute inset-0 z-10 grid place-items-center bg-white/60 backdrop-blur-sm">
-            <div className="rounded-2xl border border-slate-200 bg-white px-5 py-3 text-sm text-slate-700 shadow-sm">
-              Loading your profile…
+        {/* Status Alerts */}
+        <div className="lg:pl-4 mb-8">
+            {status.error && !status.error.includes("API error (401)") && (
+              <div className="bg-rose-50 border border-rose-100 text-rose-700 px-6 py-4 rounded-xl flex items-center gap-3 shadow-sm animate-fade-in">
+                <span className="flex-shrink-0 w-2 h-2 rounded-full bg-rose-500 animate-pulse"></span>
+                <p className="text-sm font-medium">{status.error}</p>
+              </div>
+            )}
+            {status.success && (
+              <div className="bg-emerald-50 border border-emerald-100 text-emerald-800 px-6 py-4 rounded-xl flex items-center gap-3 shadow-sm animate-fade-in">
+                <span className="flex-shrink-0 w-2 h-2 rounded-full bg-emerald-500"></span>
+                <p className="text-sm font-medium">{status.success}</p>
+              </div>
+            )}
+        </div>
+
+        {/* Layout Grid */}
+        <div className="flex flex-col lg:flex-row gap-10">
+          
+          {/* Sidebar / Identity Card */}
+          <div className="w-full lg:w-1/3 flex flex-col gap-6">
+            <div className="bg-white rounded-3xl p-8 shadow-sm border border-slate-100 flex flex-col items-center text-center">
+              <div className="w-24 h-24 bg-gradient-to-br from-slate-100 to-slate-200 rounded-full flex items-center justify-center shadow-inner mb-6">
+                 <span className="text-3xl font-light text-slate-700 tracking-widest">
+                   {(formState.name || profile?.email || "US").slice(0, 2).toUpperCase()}
+                 </span>
+              </div>
+              <h2 className="text-xl font-medium text-slate-900 line-clamp-1">{formState.name || "Customer"}</h2>
+              <div className="flex items-center gap-2 mt-2 text-slate-500 text-sm">
+                <Mail className="w-4 h-4" />
+                <span className="truncate">{profile?.email || "No email linked"}</span>
+              </div>
+              <div className="mt-8 pt-8 border-t border-slate-100 w-full">
+                  <p className="text-xs font-semibold uppercase tracking-widest text-slate-400 mb-4">Account Status</p>
+                  <div className="flex justify-between items-center text-sm">
+                      <span className="text-slate-600">Verification</span>
+                      <span className="text-emerald-600 font-medium flex items-center gap-1"><ShieldCheck className="w-4 h-4" /> Verified</span>
+                  </div>
+              </div>
+            </div>
+
+            {/* Helper Card */}
+            <div className="bg-slate-900 rounded-3xl p-8 text-white relative overflow-hidden">
+                <div className="absolute top-0 right-0 -mr-8 -mt-8 w-32 h-32 rounded-full bg-white opacity-5 mix-blend-overlay"></div>
+                <h3 className="font-medium text-lg mb-2">Need help?</h3>
+                <p className="text-slate-400 text-sm font-light leading-relaxed mb-6">
+                    If you are having trouble updating your delivery address or account details, our support team is available 24/7.
+                </p>
+                <Link to="/contact" className="text-sm font-semibold text-white border-b border-white/30 pb-1 hover:border-white transition-colors">
+                    Contact Support
+                </Link>
             </div>
           </div>
-        )}
 
-        <form className="px-6 py-6" onSubmit={handleSubmit}>
-          {status.error && !status.error.includes("API error (401)") && (
-            <div className="mb-5 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
-              {status.error}
-            </div>
-          )}
-          {status.success && (
-            <div className="mb-5 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
-              {status.success}
-            </div>
-          )}
-
-          <div className="grid gap-8">
-            <section>
-              <div className="mb-4">
-                <h2 className="text-lg font-semibold text-slate-900">Personal</h2>
-                <p className="mt-1 text-sm text-slate-600">Your basic account details.</p>
-              </div>
-
-              <div className="grid gap-4 sm:grid-cols-2">
-                <Field label="Full name" error={visibleError("name")} hint="Required">
-                  <input
-                    className={`w-full rounded-xl border bg-white px-3 py-2.5 text-base shadow-sm outline-none transition focus:ring-4 focus:ring-slate-900/5 ${
-                      visibleError("name")
-                        ? "border-rose-300 focus:border-rose-500"
-                        : "border-slate-200 focus:border-slate-900"
-                    }`}
-                    placeholder="Full name"
-                    value={formState.name}
-                    onChange={(e) => updateField("name", e.target.value)}
-                    onBlur={() => markTouched("name")}
-                    aria-invalid={Boolean(visibleError("name"))}
-                  />
-                </Field>
-
-                <Field label="Phone number" error={visibleError("phone")} hint="Required">
-                  <input
-                    className={`w-full rounded-xl border bg-white px-3 py-2.5 text-base shadow-sm outline-none transition focus:ring-4 focus:ring-slate-900/5 ${
-                      visibleError("phone")
-                        ? "border-rose-300 focus:border-rose-500"
-                        : "border-slate-200 focus:border-slate-900"
-                    }`}
-                    placeholder="+91 9876543210"
-                    value={formState.phone}
-                    onChange={(e) => updateField("phone", e.target.value)}
-                    onBlur={() => markTouched("phone")}
-                    aria-invalid={Boolean(visibleError("phone"))}
-                    inputMode="tel"
-                  />
-                </Field>
-              </div>
-            </section>
-
-            <section>
-              <div className="mb-4">
-                <h2 className="text-lg font-semibold text-slate-900">Delivery address</h2>
-                <p className="mt-1 text-sm text-slate-600">Used for order deliveries.</p>
-              </div>
-
-              <div className="grid gap-4 sm:grid-cols-2">
-                <div className="sm:col-span-2">
-                  <Field label="Address line 1" error={visibleError("addressLine1")} hint="Required">
+          {/* Main Form Area */}
+          <div className="w-full lg:w-2/3">
+            <form onSubmit={handleSubmit} className="flex flex-col gap-8">
+              
+              {/* Personal Details */}
+              <div className="bg-white rounded-3xl p-8 shadow-sm border border-slate-100">
+                <div className="mb-6 pb-6 border-b border-slate-100">
+                    <h2 className="text-xl font-medium text-slate-900">Personal Details</h2>
+                    <p className="text-slate-500 text-sm font-light mt-1">Information used to communicate with you.</p>
+                </div>
+                
+                <div className="grid gap-6 sm:grid-cols-2">
+                  <Field label="Full Name" icon={User} error={visibleError("name")}>
                     <input
-                      className={`w-full rounded-xl border bg-white px-3 py-2.5 text-base shadow-sm outline-none transition focus:ring-4 focus:ring-slate-900/5 ${
-                        visibleError("addressLine1")
-                          ? "border-rose-300 focus:border-rose-500"
-                          : "border-slate-200 focus:border-slate-900"
+                      className={`w-full rounded-xl border bg-slate-50/50 px-4 py-3 text-sm focus:bg-white shadow-sm outline-none transition-all focus:ring-2 focus:ring-slate-900/10 ${
+                        visibleError("name") ? "border-rose-300 focus:border-rose-500" : "border-slate-200 focus:border-slate-400"
                       }`}
-                      placeholder="Street address"
-                      value={formState.addressLine1}
-                      onChange={(e) => updateField("addressLine1", e.target.value)}
-                      onBlur={() => markTouched("addressLine1")}
-                      aria-invalid={Boolean(visibleError("addressLine1"))}
+                      placeholder="Jane Doe"
+                      value={formState.name}
+                      onChange={(e) => updateField("name", e.target.value)}
+                      onBlur={() => markTouched("name")}
                     />
                   </Field>
-                </div>
 
-                <div className="sm:col-span-2">
-                  <Field label="Address line 2" error={visibleError("addressLine2")} hint="Optional">
+                  <Field label="Phone Number" icon={Phone} error={visibleError("phone")}>
                     <input
-                      className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-base shadow-sm outline-none transition focus:border-slate-900 focus:ring-4 focus:ring-slate-900/5"
-                      placeholder="Apartment, suite, landmark, etc."
-                      value={formState.addressLine2}
-                      onChange={(e) => updateField("addressLine2", e.target.value)}
+                      className={`w-full rounded-xl border bg-slate-50/50 px-4 py-3 text-sm focus:bg-white shadow-sm outline-none transition-all focus:ring-2 focus:ring-slate-900/10 ${
+                        visibleError("phone") ? "border-rose-300 focus:border-rose-500" : "border-slate-200 focus:border-slate-400"
+                      }`}
+                      placeholder="+91 9876543210"
+                      value={formState.phone}
+                      onChange={(e) => updateField("phone", e.target.value)}
+                      onBlur={() => markTouched("phone")}
+                      inputMode="tel"
                     />
                   </Field>
                 </div>
-
-                <Field label="City" error={visibleError("city")} hint="Required">
-                  <input
-                    className={`w-full rounded-xl border bg-white px-3 py-2.5 text-base shadow-sm outline-none transition focus:ring-4 focus:ring-slate-900/5 ${
-                      visibleError("city")
-                        ? "border-rose-300 focus:border-rose-500"
-                        : "border-slate-200 focus:border-slate-900"
-                    }`}
-                    placeholder="City"
-                    value={formState.city}
-                    onChange={(e) => updateField("city", e.target.value)}
-                    onBlur={() => markTouched("city")}
-                    aria-invalid={Boolean(visibleError("city"))}
-                  />
-                </Field>
-
-                <Field label="State" error={visibleError("state")} hint="Required">
-                  <input
-                    className={`w-full rounded-xl border bg-white px-3 py-2.5 text-base shadow-sm outline-none transition focus:ring-4 focus:ring-slate-900/5 ${
-                      visibleError("state")
-                        ? "border-rose-300 focus:border-rose-500"
-                        : "border-slate-200 focus:border-slate-900"
-                    }`}
-                    placeholder="State"
-                    value={formState.state}
-                    onChange={(e) => updateField("state", e.target.value)}
-                    onBlur={() => markTouched("state")}
-                    aria-invalid={Boolean(visibleError("state"))}
-                  />
-                </Field>
-
-                <Field
-                  label="Pincode / Postal code"
-                  error={visibleError("postalCode")}
-                  hint="Required"
-                  footer={
-                    pinStatus.loading ? (
-                      <span className="inline-flex items-center gap-2">
-                        <span className="h-2 w-2 animate-pulse rounded-full bg-slate-400" />
-                        Looking up city/state…
-                      </span>
-                    ) : pinStatus.error ? (
-                      <span className="text-rose-600">{pinStatus.error}</span>
-                    ) : pinStatus.filled ? (
-                      <span className="text-emerald-700">City and state filled from pincode.</span>
-                    ) : (
-                      <span>Enter a 6-digit Indian pincode to auto-fill city/state.</span>
-                    )
-                  }
-                >
-                  <input
-                    className={`w-full rounded-xl border bg-white px-3 py-2.5 text-base shadow-sm outline-none transition focus:ring-4 focus:ring-slate-900/5 ${
-                      visibleError("postalCode")
-                        ? "border-rose-300 focus:border-rose-500"
-                        : "border-slate-200 focus:border-slate-900"
-                    }`}
-                    placeholder="e.g. 560001"
-                    value={formState.postalCode}
-                    onChange={(e) => updateField("postalCode", e.target.value)}
-                    onBlur={() => markTouched("postalCode")}
-                    aria-invalid={Boolean(visibleError("postalCode"))}
-                    inputMode="numeric"
-                  />
-                </Field>
-
-                <Field label="Country" error={visibleError("country")} hint="Required">
-                  <input
-                    className={`w-full rounded-xl border bg-white px-3 py-2.5 text-base shadow-sm outline-none transition focus:ring-4 focus:ring-slate-900/5 ${
-                      visibleError("country")
-                        ? "border-rose-300 focus:border-rose-500"
-                        : "border-slate-200 focus:border-slate-900"
-                    }`}
-                    placeholder="Country"
-                    value={formState.country}
-                    onChange={(e) => updateField("country", e.target.value)}
-                    onBlur={() => markTouched("country")}
-                    aria-invalid={Boolean(visibleError("country"))}
-                  />
-                </Field>
               </div>
-            </section>
 
-            <div className="flex flex-wrap items-center justify-between gap-3 border-t border-slate-200 pt-5">
-              <p className="text-sm text-slate-500">Tip: Use a phone number you can receive delivery calls on.</p>
+              {/* Delivery Address */}
+              <div className="bg-white rounded-3xl p-8 shadow-sm border border-slate-100">
+                <div className="mb-6 pb-6 border-b border-slate-100">
+                    <h2 className="text-xl font-medium text-slate-900 flex items-center gap-2">
+                        Delivery Address
+                    </h2>
+                    <p className="text-slate-500 text-sm font-light mt-1">Where your orders will be shipped.</p>
+                </div>
+                
+                <div className="grid gap-6 sm:grid-cols-2">
+                  <div className="sm:col-span-2">
+                    <Field label="Address Line 1" icon={MapPin} error={visibleError("addressLine1")}>
+                      <input
+                        className={`w-full rounded-xl border bg-slate-50/50 px-4 py-3 text-sm focus:bg-white shadow-sm outline-none transition-all focus:ring-2 focus:ring-slate-900/10 ${
+                          visibleError("addressLine1") ? "border-rose-300 focus:border-rose-500" : "border-slate-200 focus:border-slate-400"
+                        }`}
+                        placeholder="Street address, P.O. box, company name, c/o"
+                        value={formState.addressLine1}
+                        onChange={(e) => updateField("addressLine1", e.target.value)}
+                        onBlur={() => markTouched("addressLine1")}
+                      />
+                    </Field>
+                  </div>
 
-              <button
-                className="inline-flex items-center justify-center rounded-full bg-slate-900 px-6 py-3 text-sm font-semibold text-white shadow-sm transition hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-60"
-                type="submit"
-                disabled={!canSubmit}
-              >
-                {status.loading ? "Saving…" : "Save changes"}
-              </button>
-            </div>
+                  <div className="sm:col-span-2">
+                    <Field label="Address Line 2 (Optional)" hint="Optional">
+                      <input
+                        className="w-full rounded-xl border border-slate-200 focus:border-slate-400 bg-slate-50/50 px-4 py-3 text-sm focus:bg-white shadow-sm outline-none transition-all focus:ring-2 focus:ring-slate-900/10"
+                        placeholder="Apartment, suite, unit, building, floor, etc."
+                        value={formState.addressLine2}
+                        onChange={(e) => updateField("addressLine2", e.target.value)}
+                      />
+                    </Field>
+                  </div>
+
+                  <Field label="City" error={visibleError("city")}>
+                    <input
+                      className={`w-full rounded-xl border bg-slate-50/50 px-4 py-3 text-sm focus:bg-white shadow-sm outline-none transition-all focus:ring-2 focus:ring-slate-900/10 ${
+                        visibleError("city") ? "border-rose-300 focus:border-rose-500" : "border-slate-200 focus:border-slate-400"
+                      }`}
+                      placeholder="City"
+                      value={formState.city}
+                      onChange={(e) => updateField("city", e.target.value)}
+                      onBlur={() => markTouched("city")}
+                    />
+                  </Field>
+
+                  <Field label="State / Province" error={visibleError("state")}>
+                    <input
+                      className={`w-full rounded-xl border bg-slate-50/50 px-4 py-3 text-sm focus:bg-white shadow-sm outline-none transition-all focus:ring-2 focus:ring-slate-900/10 ${
+                        visibleError("state") ? "border-rose-300 focus:border-rose-500" : "border-slate-200 focus:border-slate-400"
+                      }`}
+                      placeholder="State"
+                      value={formState.state}
+                      onChange={(e) => updateField("state", e.target.value)}
+                      onBlur={() => markTouched("state")}
+                    />
+                  </Field>
+
+                  <Field
+                    label="Postal Code"
+                    error={visibleError("postalCode")}
+                    footer={
+                      pinStatus.loading ? (
+                        <span className="inline-flex items-center gap-2 mt-1">
+                          <Loader2 className="w-3 h-3 animate-spin text-slate-400" />
+                          <span className="text-slate-500 font-medium">Fetching details...</span>
+                        </span>
+                      ) : pinStatus.error ? (
+                        <span className="text-rose-500 font-medium mt-1">{pinStatus.error}</span>
+                      ) : pinStatus.filled ? (
+                        <span className="text-emerald-600 font-medium mt-1">✔ Auto-filled city & state.</span>
+                      ) : (
+                        <span className="text-slate-400 mt-1 block">Valid India pincodes auto-fill location.</span>
+                      )
+                    }
+                  >
+                    <input
+                      className={`w-full rounded-xl border bg-slate-50/50 px-4 py-3 text-sm focus:bg-white shadow-sm outline-none transition-all focus:ring-2 focus:ring-slate-900/10 ${
+                        visibleError("postalCode") ? "border-rose-300 focus:border-rose-500" : "border-slate-200 focus:border-slate-400"
+                      }`}
+                      placeholder="e.g. 560001"
+                      value={formState.postalCode}
+                      onChange={(e) => updateField("postalCode", e.target.value)}
+                      onBlur={() => markTouched("postalCode")}
+                      inputMode="numeric"
+                    />
+                  </Field>
+
+                  <Field label="Country" error={visibleError("country")}>
+                    <input
+                      className={`w-full rounded-xl border bg-slate-50/50 px-4 py-3 text-sm focus:bg-white shadow-sm outline-none transition-all focus:ring-2 focus:ring-slate-900/10 ${
+                        visibleError("country") ? "border-rose-300 focus:border-rose-500" : "border-slate-200 focus:border-slate-400"
+                      }`}
+                      placeholder="Country"
+                      value={formState.country}
+                      onChange={(e) => updateField("country", e.target.value)}
+                      onBlur={() => markTouched("country")}
+                    />
+                  </Field>
+                </div>
+              </div>
+
+              {/* Action Bar */}
+              <div className="flex flex-col-reverse sm:flex-row items-center justify-between gap-4 mt-2 mb-10">
+                <p className="text-sm text-slate-500 font-light text-center sm:text-left">
+                  Your data is securely encrypted and stored.
+                </p>
+                <button
+                  className="w-full sm:w-auto btn-primary px-10 h-12 shadow-md hover:shadow-lg disabled:opacity-50 disabled:shadow-none transition-all"
+                  type="submit"
+                  disabled={!canSubmit || status.loading}
+                >
+                  {status.loading ? (
+                    <span className="flex items-center gap-2">
+                        <Loader2 className="w-4 h-4 animate-spin" /> Saving...
+                    </span>
+                  ) : (
+                      "Save Preferences"
+                  )}
+                </button>
+              </div>
+
+            </form>
           </div>
-        </form>
+        </div>
       </div>
     </div>
   );

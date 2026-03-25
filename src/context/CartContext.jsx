@@ -60,36 +60,48 @@ export function CartProvider({ children }) {
     [items]
   );
 
-  const addItem = (product, quantity = 1) => {
+  const addItem = (product, quantity = 1, size = null) => {
     if (!product) return false;
-    const stock = product.stock !== undefined ? product.stock : Infinity;
-    const existing = items.find((p) => p.id === product.id);
+    
+    let stock = Infinity;
+    if (size && product.variants?.length > 0) {
+      const variant = product.variants.find(v => v.size === size);
+      stock = variant ? variant.stock : 0;
+    } else if (product.stock !== undefined) {
+      stock = product.stock;
+    }
+
+    const cartItemId = size ? `${product.id}-${size}` : String(product.id);
+
+    const existing = items.find((p) => p.cartItemId === cartItemId);
     const currentQty = existing ? existing.quantity || 1 : 0;
 
     if (currentQty + quantity > stock) {
-      push(`Only ${stock} left in stock. Adjust quantity.`, "error");
+      push(`Only ${stock} left in stock for this size. Adjust quantity.`, "error");
       return false;
     }
 
     setItems((prev) => {
-      const existingItem = prev.find((p) => p.id === product.id);
+      const existingItem = prev.find((p) => p.cartItemId === cartItemId);
       if (existingItem) {
         return prev.map((p) =>
-          p.id === product.id
-            ? { ...p, quantity: (p.quantity || 1) + quantity, stock: product.stock }
+          p.cartItemId === cartItemId
+            ? { ...p, quantity: (p.quantity || 1) + quantity, stock }
             : p
         );
       }
       return [
         ...prev,
         {
+          cartItemId,
           id: product.id,
           title: product.title,
           price: product.price,
           slug: product.slug,
           image: product.productImages?.[0]?.url,
           quantity: quantity || 1,
-          stock: product.stock
+          stock,
+          size
         }
       ];
     });
@@ -98,12 +110,12 @@ export function CartProvider({ children }) {
     return true;
   };
 
-  const updateQuantity = (id, quantity) => {
+  const updateQuantity = (cartItemId, quantity) => {
     const numericQty = Math.max(Number(quantity) || 0, 0);
     setItems((prev) =>
       prev
         .map((item) => {
-          if (item.id !== id) return item;
+          if (item.cartItemId !== cartItemId) return item;
           const capped = item.stock !== undefined && numericQty > item.stock ? item.stock : numericQty;
           return { ...item, quantity: capped };
         })
@@ -111,18 +123,18 @@ export function CartProvider({ children }) {
     );
   };
 
-  const updateItemStock = (id, stock) => {
+  const updateItemStock = (cartItemId, stock) => {
     setItems((prev) =>
       prev.map((item) => {
-        if (item.id !== id) return item;
+        if (item.cartItemId !== cartItemId) return item;
         const nextQty = item.quantity && stock !== undefined ? Math.min(item.quantity, stock) : item.quantity;
         return { ...item, stock, quantity: nextQty };
       })
     );
   };
 
-  const removeItem = (id) => {
-    setItems((prev) => prev.filter((item) => item.id !== id));
+  const removeItem = (cartItemId) => {
+    setItems((prev) => prev.filter((item) => item.cartItemId !== cartItemId));
     push("Removed from cart", "info");
   };
 

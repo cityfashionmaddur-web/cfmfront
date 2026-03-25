@@ -23,7 +23,11 @@ export default function Cart() {
         if (!active) return;
         (data?.products || []).forEach((product) => {
           if (product?.id !== undefined) {
-            updateItemStock(product.id, product.stock);
+             items.filter(i => i.id === product.id).forEach(cartItem => {
+               const variant = product.variants?.find(v => v.size === cartItem.size);
+               const stock = variant ? variant.stock : product.stock;
+               updateItemStock(cartItem.cartItemId, stock);
+            });
           }
         });
       } catch (err) {
@@ -99,7 +103,7 @@ export default function Cart() {
             <div className="mt-3 space-y-3">
               {items.map((item) => (
                 <div
-                  key={item.id}
+                  key={item.cartItemId}
                   className="grid gap-3 rounded-2xl border border-slate-200 bg-white/95 p-4 shadow-sm sm:grid-cols-[110px_1fr_auto]"
                 >
                   <div className="flex items-start gap-3">
@@ -116,6 +120,11 @@ export default function Cart() {
                       </Link>
                       <p className="text-sm font-semibold text-slate-900">{formatPrice(item.price)}</p>
                       <div className="flex flex-wrap items-center gap-2 text-xs text-slate-600">
+                        {item.size && (
+                          <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2 py-1 text-[11px] font-semibold uppercase tracking-[0.1em] text-slate-700">
+                            Size: {item.size}
+                          </span>
+                        )}
                         <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-1 text-[11px] font-semibold uppercase tracking-[0.15em] text-emerald-700">
                           In stock
                         </span>
@@ -134,7 +143,7 @@ export default function Cart() {
                         Qty
                         <select
                           value={item.quantity || 1}
-                          onChange={(event) => updateQuantity(item.id, Number(event.target.value))}
+                          onChange={(event) => updateQuantity(item.cartItemId, Number(event.target.value))}
                           className="mt-1 w-full max-w-[120px] rounded-lg border border-slate-200 bg-white px-2 py-2 text-sm text-slate-900 shadow-sm focus:border-slate-900 focus:outline-none"
                         >
                           {Array.from(
@@ -152,7 +161,7 @@ export default function Cart() {
                       </label>
                     )}
                     <div className="flex flex-wrap gap-3 text-xs font-semibold text-slate-600">
-                      <button className="hover:text-slate-900" onClick={() => removeItem(item.id)}>
+                      <button className="hover:text-slate-900" onClick={() => removeItem(item.cartItemId)}>
                         Remove
                       </button>
                       <span aria-hidden>•</span>

@@ -80,7 +80,7 @@ export default function AdminProducts() {
                     <td>{product.title}</td>
                     <td>{product.category?.name || "-"}</td>
                     <td>{formatPrice(product.price)}</td>
-                    <td>{product.stock ?? "-"}</td>
+                    <td>{product.variants?.reduce((sum, v) => sum + v.stock, 0) || 0} ({product.variants?.length || 0} sizes)</td>
                     <td>
                       <span className={`admin-pill ${product.active ? "admin-pill-active" : ""}`}>
                         {product.active ? "Active" : "Hidden"}

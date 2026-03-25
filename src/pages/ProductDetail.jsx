@@ -20,6 +20,7 @@ export default function ProductDetail() {
 
   // State for accordions
   const [openSection, setOpenSection] = useState("details");
+  const [selectedSize, setSelectedSize] = useState("");
 
   useEffect(() => {
     let active = true;
@@ -54,11 +55,28 @@ export default function ProductDetail() {
     [product]
   );
 
-  const inStock = product?.stock === undefined || product?.stock > 0;
+  const hasVariants = product?.variants && product.variants.length > 0;
+  
+  const inStock = hasVariants
+    ? (selectedSize 
+       ? product.variants.find(v => v.size === selectedSize)?.stock > 0 
+       : product.variants.some(v => v.stock > 0))
+    : (product?.stock === undefined || product?.stock > 0);
+
+  const getStockCount = () => {
+    if (hasVariants && selectedSize) {
+      return product.variants.find(v => v.size === selectedSize)?.stock || 0;
+    }
+    return product?.stock || 0;
+  };
 
   const handleAdd = () => {
     if (!product) return;
-    const success = addItem(product, Number(quantity) || 1);
+    if (hasVariants && !selectedSize) {
+      alert("Please select a size before adding to cart.");
+      return;
+    }
+    const success = addItem(product, Number(quantity) || 1, selectedSize);
     if (success) openDrawer();
   };
 
@@ -175,28 +193,64 @@ export default function ProductDetail() {
               {/* Action Area */}
               <div className="pt-4 border-t border-slate-100 space-y-6">
 
+                {/* Size Selector */}
+                {hasVariants && (
+                  <div className="space-y-4">
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm font-medium text-slate-900">Select Size</span>
+                      <button className="text-xs text-slate-500 underline font-medium hover:text-slate-900 transition-colors">Size Guide</button>
+                    </div>
+                    <div className="flex flex-wrap gap-2 sm:gap-3">
+                      {product.variants.map((v) => {
+                         const isSelected = selectedSize === v.size;
+                         const isOutOfStock = v.stock === 0;
+                         return (
+                           <button
+                             key={v.size}
+                             onClick={() => !isOutOfStock && setSelectedSize(v.size)}
+                             disabled={isOutOfStock}
+                             className={`min-w-[3rem] sm:min-w-[3.5rem] h-12 px-4 border text-sm font-semibold transition-all duration-200 ${
+                               isSelected
+                                 ? 'border-slate-900 bg-slate-900 text-white shadow-md transform -translate-y-0.5'
+                                 : isOutOfStock
+                                 ? 'border-slate-100 bg-slate-50 text-slate-300 cursor-not-allowed line-through'
+                                 : 'border-slate-200 bg-white text-slate-700 hover:border-slate-900 hover:text-slate-900 shadow-sm hover:shadow'
+                             }`}
+                           >
+                             {v.size}
+                           </button>
+                         )
+                      })}
+                    </div>
+                  </div>
+                )}
+
                 {/* Quantity & Stock Status */}
-                <div className="flex items-center justify-between">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 py-2">
                   <div className="flex items-center gap-4">
                     <span className="text-sm font-medium text-slate-900">Quantity</span>
-                    <div className="flex items-center border border-slate-200 rounded-full px-2 py-1">
+                    <div className="flex items-center border border-slate-200 rounded-full px-2 py-1 bg-white shadow-sm">
                       <button
                         onClick={() => setQuantity(q => Math.max(1, q - 1))}
-                        className="p-2 text-slate-500 hover:text-slate-900 transition"
+                        className="p-2 text-slate-500 hover:text-slate-900 transition-colors"
                       >
                         <Minus />
                       </button>
                       <span className="w-8 text-center text-sm font-medium">{quantity}</span>
                       <button
-                         onClick={() => setQuantity(q => Math.min(product.stock || 99, q + 1))}
-                         className="p-2 text-slate-500 hover:text-slate-900 transition"
+                         onClick={() => setQuantity(q => Math.min(getStockCount() || 99, q + 1))}
+                         className="p-2 text-slate-500 hover:text-slate-900 transition-colors"
                       >
                         <Plus />
                       </button>
                     </div>
                   </div>
-                  <div className={`text-xs font-medium uppercase tracking-wider ${inStock ? 'text-emerald-600' : 'text-rose-600'}`}>
-                     {inStock ? (product.stock <= 5 ? `Only ${product.stock} left` : 'In Stock') : 'Sold Out'}
+                  <div className={`text-xs font-semibold uppercase tracking-[0.1em] px-3 py-1.5 rounded-full inline-flex md:bg-opacity-10 ${
+                    inStock 
+                      ? 'bg-emerald-50 text-emerald-700' 
+                      : 'bg-rose-50 text-rose-700'
+                  }`}>
+                     {inStock ? (getStockCount() <= 5 ? `Only ${getStockCount()} left` : 'In Stock') : 'Sold Out'}
                   </div>
                 </div>
 

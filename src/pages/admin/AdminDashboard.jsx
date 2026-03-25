@@ -41,7 +41,7 @@ export default function AdminDashboard() {
   }, []);
 
   const lowStock = useMemo(
-    () => products.filter((item) => (item.stock ?? 0) <= 5).slice(0, 5),
+    () => products.filter((item) => (item.variants?.reduce((sum, v) => sum + v.stock, 0) || 0) <= 5).slice(0, 5),
     [products]
   );
 
@@ -194,7 +194,7 @@ export default function AdminDashboard() {
                         <p className="admin-list-title">{product.title}</p>
                         <p className="admin-list-meta">{formatPrice(product.price)}</p>
                       </div>
-                      <span className="admin-pill">Stock: {product.stock ?? 0}</span>
+                      <span className="admin-pill">Stock: {product.variants?.reduce((sum, v) => sum + v.stock, 0) || 0}</span>
                     </div>
                   ))}
                 </div>

@@ -14,7 +14,9 @@ export default function OAuthCallback() {
 
     if (token) {
       login({ token, user: null });
-      navigate("/profile", { replace: true });
+      const returnTo = sessionStorage.getItem("returnTo") || "/profile";
+      sessionStorage.removeItem("returnTo");
+      navigate(returnTo, { replace: true });
       return;
     }
 

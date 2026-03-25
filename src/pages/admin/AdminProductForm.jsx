@@ -6,7 +6,7 @@ const emptyForm = {
   title: "",
   price: "",
   description: "",
-  stock: "",
+  variants: [],
   images: "",
   categoryId: "",
   active: true
@@ -46,7 +46,7 @@ export default function AdminProductForm({ mode = "edit" }) {
             title: productData.title || "",
             price: productData.price ?? "",
             description: productData.description || "",
-            stock: productData.stock ?? "",
+            variants: productData.variants || [],
             images: (productData.productImages || []).map((img) => img.url).join("\n"),
             categoryId: productData.categoryId || "",
             active: productData.active ?? true
@@ -100,12 +100,43 @@ export default function AdminProductForm({ mode = "edit" }) {
     }
   };
 
+  const addVariant = () => {
+    setForm((prev) => ({ ...prev, variants: [...prev.variants, { size: "", stock: 0 }] }));
+  };
+
+  const updateVariant = (index, field, value) => {
+    setForm((prev) => {
+      const newVariants = [...prev.variants];
+      newVariants[index] = { ...newVariants[index], [field]: value };
+      return { ...prev, variants: newVariants };
+    });
+  };
+
+  const removeVariant = (index) => {
+    setForm((prev) => {
+      const newVariants = [...prev.variants];
+      newVariants.splice(index, 1);
+      return { ...prev, variants: newVariants };
+    });
+  };
+
+  const fillPattern = (pattern) => {
+    let sizes = [];
+    if (pattern === "letters") sizes = ["S", "M", "L", "XL", "XXL", "3XL"];
+    if (pattern === "waist") sizes = ["28", "30", "32", "34", "36", "38", "40"];
+    if (pattern === "large") sizes = ["50", "55", "60", "65", "70", "75", "80"];
+    
+    setForm((prev) => ({
+      ...prev,
+      variants: sizes.map((size) => ({ size, stock: 0 }))
+    }));
+  };
+
   const handleSubmit = async (event) => {
     event.preventDefault();
     setStatus((prev) => ({ ...prev, saving: true, error: "", success: "" }));
 
     const price = Number(form.price);
-    const stock = form.stock === "" ? null : Number(form.stock);
     const images = parsedImages;
 
     if (!form.title.trim() || Number.isNaN(price)) {
@@ -113,11 +144,16 @@ export default function AdminProductForm({ mode = "edit" }) {
       return;
     }
 
+    if (form.variants.some(v => !v.size.trim())) {
+      setStatus((prev) => ({ ...prev, saving: false, error: "All size variants must have a name." }));
+      return;
+    }
+
     const basePayload = {
       title: form.title.trim(),
       description: form.description.trim(),
       price,
-      stock: stock ?? 0,
+      variants: form.variants,
       active: Boolean(form.active),
       categoryId: form.categoryId ? Number(form.categoryId) : undefined
     };
@@ -196,16 +232,36 @@ export default function AdminProductForm({ mode = "edit" }) {
                 ))}
               </select>
             </label>
-            <label className="admin-field">
-              <span>Stock</span>
-              <input
-                className="input"
-                type="number"
-                min="0"
-                value={form.stock}
-                onChange={updateField("stock")}
-              />
-            </label>
+            <div></div>
+          </div>
+
+          <div className="admin-variants-panel panel" style={{ marginBottom: "1.5rem" }}>
+            <div className="admin-section-header" style={{ marginBottom: "1rem" }}>
+              <div>
+                <h3>Size Variants & Stock</h3>
+                <p>Manage inventory by specific sizes.</p>
+              </div>
+              <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap", marginTop: "1rem" }}>
+                <button type="button" className="btn btn-outline" onClick={() => fillPattern('letters')}>S-3XL</button>
+                <button type="button" className="btn btn-outline" onClick={() => fillPattern('waist')}>28-40</button>
+                <button type="button" className="btn btn-outline" onClick={() => fillPattern('large')}>50-80</button>
+                <button type="button" className="btn btn-primary" onClick={addVariant}>+ Add Size</button>
+              </div>
+            </div>
+            
+            {form.variants.length === 0 ? (
+              <p className="helper">No sizes added. You can add them manually or use a preset.</p>
+            ) : (
+              <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
+                {form.variants.map((v, i) => (
+                  <div key={i} style={{ display: "flex", gap: "1rem", alignItems: "center" }}>
+                    <input className="input" style={{ width: "120px" }} placeholder="Size (e.g. M)" value={v.size} onChange={(e) => updateVariant(i, "size", e.target.value)} required />
+                    <input className="input" type="number" min="0" placeholder="Stock" value={v.stock} onChange={(e) => updateVariant(i, "stock", Number(e.target.value))} required />
+                    <button type="button" className="btn btn-outline" onClick={() => removeVariant(i)}>✖</button>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
 
           <label className="admin-field">

@@ -158,7 +158,7 @@ export default function Checkout() {
         {
           currency: "INR",
           receipt: `cf-${Date.now()}`,
-          items: items.map((item) => ({ productId: item.id, quantity: item.quantity })),
+          items: items.map((item) => ({ productId: item.id, quantity: item.quantity, size: item.size })),
           ...formState
         },
         { auth: true }
@@ -191,7 +191,7 @@ export default function Checkout() {
       <div className="flex flex-col items-center gap-3 rounded-3xl border border-dashed border-slate-300 bg-white/70 p-10 text-center shadow-inner">
         <h2 className="text-2xl font-semibold">Login required</h2>
         <p className="text-slate-600">Checkout needs a verified account so we can attach your order to a profile.</p>
-        <Link className="rounded-full bg-slate-900 px-4 py-2 text-sm font-semibold text-white shadow-lg" to="/login">
+        <Link className="rounded-full bg-slate-900 px-4 py-2 text-sm font-semibold text-white shadow-lg" to="/login?returnTo=/checkout">
           Continue to login
         </Link>
       </div>
