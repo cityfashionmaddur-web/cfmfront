@@ -19,6 +19,7 @@ import {
 const emptyForm = {
   title: "",
   price: "",
+  compareAtPrice: "",
   description: "",
   variants: [],
   images: "",
@@ -59,6 +60,7 @@ export default function AdminProductForm({ mode = "edit" }) {
           setForm({
             title: productData.title || "",
             price: productData.price ?? "",
+            compareAtPrice: productData.compareAtPrice ?? "",
             description: productData.description || "",
             variants: productData.variants || [],
             images: (productData.productImages || []).map((img) => img.url).join("\n"),
@@ -167,6 +169,7 @@ export default function AdminProductForm({ mode = "edit" }) {
       title: form.title.trim(),
       description: form.description.trim(),
       price,
+      compareAtPrice: form.compareAtPrice ? Number(form.compareAtPrice) : null,
       variants: form.variants,
       active: Boolean(form.active),
       categoryId: form.categoryId ? Number(form.categoryId) : undefined
@@ -277,7 +280,7 @@ export default function AdminProductForm({ mode = "edit" }) {
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
-                  <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 px-1">System Price</label>
+                  <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 px-1">Offer Price</label>
                   <div className="relative">
                     <span className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-400 font-black">₹</span>
                     <input 
@@ -290,20 +293,34 @@ export default function AdminProductForm({ mode = "edit" }) {
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 px-1">Taxonomy Class</label>
+                  <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 px-1">Compare At / Original Price</label>
                   <div className="relative">
-                    <select 
-                      className="w-full px-6 py-4 rounded-2xl border border-slate-200 focus:outline-none focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all font-bold text-slate-800 appearance-none bg-white"
-                      value={form.categoryId} 
-                      onChange={updateField("categoryId")}
-                    >
-                      <option value="">Select Category</option>
-                      {categories.map((c) => (
-                        <option key={c.id} value={c.id}>{c.name}</option>
-                      ))}
-                    </select>
-                    <ChevronDown size={14} className="absolute right-6 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
+                    <span className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-400 font-black">₹</span>
+                    <input 
+                      type="number"
+                      className="w-full pl-10 pr-6 py-4 rounded-2xl border border-slate-200 focus:outline-none focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all font-bold text-slate-800"
+                      placeholder="Optional"
+                      value={form.compareAtPrice} 
+                      onChange={updateField("compareAtPrice")} 
+                    />
                   </div>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 px-1">Taxonomy Class</label>
+                <div className="relative md:w-1/2">
+                  <select 
+                    className="w-full px-6 py-4 rounded-2xl border border-slate-200 focus:outline-none focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all font-bold text-slate-800 appearance-none bg-white"
+                    value={form.categoryId} 
+                    onChange={updateField("categoryId")}
+                  >
+                    <option value="">Select Category</option>
+                    {categories.map((c) => (
+                      <option key={c.id} value={c.id}>{c.name}</option>
+                    ))}
+                  </select>
+                  <ChevronDown size={14} className="absolute right-6 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
                 </div>
               </div>
 

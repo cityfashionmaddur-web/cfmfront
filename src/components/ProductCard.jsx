@@ -14,6 +14,11 @@ export default function ProductCard({ product }) {
   const isOut = product?.stock === 0;
   const isLowStock = product?.stock > 0 && product?.stock <= 5;
   const isNew = new Date(product?.createdAt) > new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+  
+  const hasSale = product?.compareAtPrice && Number(product.compareAtPrice) > Number(product.price);
+  const discountPercent = hasSale 
+    ? Math.round((1 - Number(product.price) / Number(product.compareAtPrice)) * 100) 
+    : 0;
 
   return (
     <div className="group relative flex flex-col">
@@ -41,6 +46,11 @@ export default function ProductCard({ product }) {
 
         {/* Status Badges */}
         <div className="absolute top-3 left-3 flex flex-col gap-2">
+          {hasSale && !isOut && (
+            <span className="inline-block bg-red-600 px-3 py-1 text-[9px] font-black uppercase tracking-[0.2em] text-white shadow-sm">
+              {discountPercent}% OFF
+            </span>
+          )}
           {isOut && (
             <span className="inline-block bg-white px-3 py-1 text-[9px] font-black uppercase tracking-[0.2em] text-ink shadow-sm">
               Sold Out
@@ -51,7 +61,7 @@ export default function ProductCard({ product }) {
               Few Left
             </span>
           )}
-          {!isOut && isNew && (
+          {!isOut && !hasSale && isNew && (
             <span className="inline-block bg-white px-3 py-1 text-[9px] font-black uppercase tracking-[0.2em] text-ink shadow-sm">
               New Output
             </span>
@@ -59,14 +69,19 @@ export default function ProductCard({ product }) {
         </div>
       </Link>
 
-      <div className="mt-4 flex flex-col gap-1 items-center text-center">
+      <div className="mt-4 flex flex-col gap-1 items-center text-center px-2">
         <Link
           to={`/products/${product.slug}`}
-          className="text-xs font-bold uppercase tracking-[0.15em] text-ink hover:text-gray-500 transition-colors line-clamp-1"
+          className="text-[11px] font-bold uppercase tracking-[0.15em] text-ink hover:text-gray-500 transition-colors line-clamp-1"
         >
           {product.title}
         </Link>
-        <p className="text-xs font-medium text-gray-500 mt-1">{formatPrice(product.price)}</p>
+        <p className="text-xs font-medium text-gray-500 mt-1 flex items-center justify-center gap-2">
+          {hasSale && (
+            <span className="line-through text-gray-300">{formatPrice(product.compareAtPrice)}</span>
+          )}
+          <span className={hasSale ? "text-red-600 font-bold" : "text-ink"}>{formatPrice(product.price)}</span>
+        </p>
       </div>
     </div>
   );

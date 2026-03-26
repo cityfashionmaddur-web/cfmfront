@@ -8,6 +8,13 @@ import ProductCard from "../components/ProductCard.jsx";
 const ChevronDown = () => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="square" strokeLinejoin="miter"><path d="m6 9 6 6 6-6"/></svg>;
 const Minus = () => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="square" strokeLinejoin="miter"><path d="M5 12h14"/></svg>;
 const Plus = () => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="square" strokeLinejoin="miter"><path d="M5 12h14"/><path d="M12 5v14"/></svg>;
+const ShareIcon = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="square" strokeLinejoin="miter">
+    <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/>
+    <polyline points="16 6 12 2 8 6"/>
+    <line x1="12" y1="2" x2="12" y2="15"/>
+  </svg>
+);
 
 export default function ProductDetail() {
   const { slug } = useParams();
@@ -77,6 +84,25 @@ export default function ProductDetail() {
     }
     const success = addItem(product, Number(quantity) || 1, selectedSize);
     if (success) openDrawer();
+  };
+
+  const handleShare = async () => {
+    if (!product) return;
+    const shareData = {
+      title: product.title,
+      text: "Check out this piece from Cityfashion Maddur.",
+      url: window.location.href,
+    };
+    try {
+      if (navigator.share) {
+        await navigator.share(shareData);
+      } else {
+        await navigator.clipboard.writeText(window.location.href);
+        alert("Link copied to clipboard!"); 
+      }
+    } catch (err) {
+      console.warn("Share failed (or user cancelled):", err);
+    }
   };
 
   const toggleSection = (section) => {
@@ -151,11 +177,28 @@ export default function ProductDetail() {
             <div className="sticky top-24 space-y-10">
 
               <div className="space-y-4">
-                <h1 className="text-3xl lg:text-5xl font-heading font-black uppercase tracking-tighter text-ink leading-none">
-                  {product.title}
-                </h1>
-                <div className="text-xl font-medium text-ink">
-                  {formatPrice(product.price)}
+                <div className="flex items-start justify-between gap-4">
+                  <h1 className="text-3xl lg:text-5xl font-heading font-black uppercase tracking-tighter text-ink leading-none">
+                    {product.title}
+                  </h1>
+                  <button onClick={handleShare} className="text-gray-400 hover:text-ink transition-colors p-2 -mt-2 -mr-2" aria-label="Share Piece" title="Share Piece">
+                    <ShareIcon />
+                  </button>
+                </div>
+                <div className="flex items-center gap-4">
+                  <div className="text-xl font-medium text-ink">
+                    {formatPrice(product.price)}
+                  </div>
+                  {product.compareAtPrice && Number(product.compareAtPrice) > Number(product.price) && (
+                    <>
+                      <div className="text-lg font-medium text-gray-400 line-through">
+                        {formatPrice(product.compareAtPrice)}
+                      </div>
+                      <div className="text-[10px] font-black uppercase tracking-widest text-red-600 bg-red-50 px-3 py-1">
+                        {Math.round((1 - Number(product.price) / Number(product.compareAtPrice)) * 100)}% Savings
+                      </div>
+                    </>
+                  )}
                 </div>
               </div>
 
