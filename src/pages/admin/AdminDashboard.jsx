@@ -186,6 +186,21 @@ export default function AdminDashboard() {
                       <div>
                         <p className="font-bold text-slate-900">Order #{order.id}</p>
                         <p className="text-xs text-slate-500 truncate max-w-[140px] md:max-w-xs">{order.user?.email || "Guest Checkout"}</p>
+                        <div className="mt-1.5 flex flex-wrap gap-2">
+                          {order.items?.map((item, idx) => (
+                            <div key={idx} className="flex items-center gap-1 bg-white border border-slate-200 rounded-lg px-2 py-1 shadow-sm">
+                               <span className="text-[10px] font-bold text-slate-700 truncate max-w-[80px]" title={item.product?.title}>
+                                 {item.product?.title || "Item"}
+                               </span>
+                               {item.size && (
+                                 <span className="text-[9px] font-black text-indigo-600 bg-indigo-50 px-1.5 py-0.5 rounded uppercase tracking-widest border border-indigo-100/50">
+                                   {item.size}
+                                 </span>
+                               )}
+                               <span className="text-[10px] font-bold text-slate-400">x{item.quantity}</span>
+                            </div>
+                          ))}
+                        </div>
                       </div>
                     </div>
                     <div className="flex flex-col items-end gap-1">
