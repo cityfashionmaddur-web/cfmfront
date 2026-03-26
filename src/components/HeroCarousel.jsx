@@ -32,74 +32,34 @@ export default function HeroCarousel({ slides = [] }) {
         <div
           key={idx}
           className={`absolute inset-0 transition-opacity duration-1000 ease-[0.25,1,0.5,1] ${
-            idx === active ? "z-20 opacity-100" : "z-0 opacity-0"
+            idx === active ? "z-20 opacity-100" : "z-0 opacity-0 pointer-events-none"
           }`}
         >
-          {/* Image */}
-          <img
-            src={slide.image}
-            alt={slide.title}
-            className="h-full w-full object-cover object-center"
-            style={{ 
-              transform: idx === active ? "scale(1.05)" : "scale(1.15)", 
-              transition: "transform 10s ease-out" 
-            }}
-            loading={idx === 0 ? "eager" : "lazy"}
-          />
-
-          {/* Gradient Overlay for stark contrast */}
-          <div className="absolute inset-0 bg-gradient-to-t from-ink/90 via-ink/20 to-transparent" />
-          <div className="absolute inset-0 bg-black/20" /> {/* Slight darkening for text pop */}
-
-          {/* Content Container */}
-          <div className="absolute inset-0 flex items-end justify-center px-6 pb-24 md:pb-32 lg:px-16 text-center">
-            <div
-              className={`flex w-full max-w-4xl flex-col items-center gap-6 transition-all duration-1000 delay-100 ${
-                idx === active ? "translate-y-0 opacity-100" : "translate-y-8 opacity-0"
-              }`}
-            >
-              <div className="flex flex-wrap items-center justify-center gap-4">
-                <span className="text-[10px] font-black uppercase tracking-[0.3em] text-white/90">
-                  {slide.badge || "Campaign"}
-                </span>
-              </div>
-
-              <div className="space-y-6">
-                <h1 className="text-5xl md:text-7xl lg:text-8xl font-heading font-bold uppercase tracking-tighter leading-[0.9]">
-                  {slide.title}
-                </h1>
-                {slide.subtitle && (
-                  <p className="max-w-2xl mx-auto text-sm md:text-base font-medium uppercase tracking-[0.1em] text-white/80">
-                    {slide.subtitle}
-                  </p>
-                )}
-                <div className="flex flex-wrap items-center justify-center gap-4 pt-8">
-                  {slide.ctas?.map((cta, i) => (
-                    <Link
-                      key={i}
-                      to={cta.href}
-                      className={cta.variant === "primary" ? "btn-primary bg-white text-ink hover:bg-gray-200" : "btn-secondary text-white border-white hover:bg-white hover:text-ink"}
-                    >
-                      {cta.label}
-                    </Link>
-                  ))}
-                </div>
-              </div>
-
-              {(slide.caption || slide.tags?.length) && (
-                <div className="hidden md:flex flex-wrap items-center justify-center gap-4 pt-8 text-[10px] font-bold uppercase tracking-widest text-white/50">
-                  {slide.caption && (
-                    <span>{slide.caption}</span>
-                  )}
-                  {slide.tags?.map((tag, tagIdx) => (
-                    <span key={tagIdx}>
-                      {tag}
-                    </span>
-                  ))}
-                </div>
-              )}
-            </div>
-          </div>
+          {slide.targetHref ? (
+            <Link to={slide.targetHref} className="block w-full h-full cursor-pointer">
+               <img
+                  src={slide.image}
+                  alt={slide.title || "Latest Arrivals"}
+                  className="h-full w-full object-cover object-center"
+                  style={{ 
+                    transform: idx === active ? "scale(1.00)" : "scale(1.05)", 
+                    transition: "transform 10s ease-out" 
+                  }}
+                  loading={idx === 0 ? "eager" : "lazy"}
+               />
+            </Link>
+          ) : (
+            <img
+              src={slide.image}
+              alt={slide.title || "Latest Arrivals"}
+              className="h-full w-full object-cover object-center"
+              style={{ 
+                transform: idx === active ? "scale(1.00)" : "scale(1.05)", 
+                transition: "transform 10s ease-out" 
+              }}
+              loading={idx === 0 ? "eager" : "lazy"}
+            />
+          )}
         </div>
       ))}
 

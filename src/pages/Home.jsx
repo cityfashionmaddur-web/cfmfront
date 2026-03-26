@@ -40,13 +40,14 @@ function mapHeroSlides(slides = []) {
       subtitle: slide.subtitle,
       image: slide.image,
       caption: slide.caption,
+      targetHref: slide.cta1Href || slide.cta2Href,
       tags: slide.tags ? slide.tags.split(",").map((tag) => tag.trim()) : [],
       ctas: [
         slide.cta1Label && { label: slide.cta1Label, href: slide.cta1Href, variant: "primary" },
         slide.cta2Label && { label: slide.cta2Label, href: slide.cta2Href }
       ].filter(Boolean)
     }))
-    .filter((slide) => slide.title && slide.image);
+    .filter((slide) => slide.image);
 }
 
 export default function Home() {
