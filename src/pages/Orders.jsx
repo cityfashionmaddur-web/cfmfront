@@ -124,6 +124,19 @@ export default function Orders() {
                          <span className="font-black tracking-wide uppercase">{order.paymentMethod || "razorpay"}</span>
                        </div>
                      </div>
+
+                     {(order.addressLine1 || order.city) && (
+                       <div className="pt-6 border-t border-gray-200 mb-2">
+                         <p className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-3">Shipping Domain</p>
+                         <div className="text-sm font-bold text-gray-800">
+                           <p>{order.addressLine1}</p>
+                           {order.addressLine2 && <p>{order.addressLine2}</p>}
+                           <p>{order.city}, {order.state} {order.postalCode}</p>
+                           <p className="text-black uppercase text-[10px] tracking-widest mt-1">{order.country || "India"}</p>
+                           {order.phone && <p className="mt-2 text-gray-500">{order.phone}</p>}
+                         </div>
+                       </div>
+                     )}
                    </div>
 
                    <div className="pt-6 border-t border-gray-200">
