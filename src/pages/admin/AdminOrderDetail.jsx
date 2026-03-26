@@ -2,8 +2,34 @@ import React, { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { adminGet, adminPut } from "../../utils/adminApi.js";
 import { formatDate, formatPrice } from "../../utils/format.js";
+import { 
+  ArrowLeft, 
+  ShoppingBag, 
+  User, 
+  MapPin, 
+  CreditCard, 
+  Truck, 
+  Calendar, 
+  Save, 
+  CheckCircle2, 
+  XCircle, 
+  Clock,
+  Phone,
+  Mail,
+  Hash,
+  ChevronRight,
+  Package
+} from "lucide-react";
 
 const STATUS_OPTIONS = ["PENDING", "PAID", "SHIPPED", "DELIVERED", "CANCELLED"];
+
+const STATUS_ICONS = {
+  PENDING: Clock,
+  PAID: CheckCircle2,
+  SHIPPED: Truck,
+  DELIVERED: CheckCircle2,
+  CANCELLED: XCircle
+};
 
 export default function AdminOrderDetail() {
   const { id } = useParams();
@@ -69,149 +95,279 @@ export default function AdminOrderDetail() {
     }
   };
 
+  if (status.loading) {
+    return (
+      <div className="flex flex-col items-center justify-center py-40">
+        <div className="h-12 w-12 border-4 border-slate-100 border-t-indigo-600 rounded-full animate-spin"></div>
+        <p className="mt-6 text-slate-500 font-bold tracking-tight">Locating order record...</p>
+      </div>
+    );
+  }
+
+  if (!order) {
+    return (
+      <div className="flex flex-col items-center justify-center py-40 text-center">
+        <XCircle size={48} className="text-slate-200 mb-4" />
+        <h2 className="text-xl font-black text-slate-900">Order Not Found</h2>
+        <p className="text-slate-500 mt-1 mb-6">This reference ID does not exist in our database.</p>
+        <Link to="/admin/orders" className="btn btn-primary">Return to Orders</Link>
+      </div>
+    );
+  }
+
   return (
-    <div className="page-stack">
-      <section className="section-header">
-        <div>
-          <h1>Order #{id}</h1>
-          <p>Order details and fulfillment workflow.</p>
+    <div className="page-stack admin-animate">
+      <section className="section-header border-b border-slate-100 pb-8 mb-4">
+        <div className="flex items-center gap-4">
+          <Link to="/admin/orders" className="p-3 bg-white border border-slate-200 rounded-2xl text-slate-400 hover:text-indigo-600 hover:border-indigo-100 transition-all shadow-sm">
+            <ArrowLeft size={20} />
+          </Link>
+          <div>
+            <div className="flex items-center gap-3">
+               <h1 className="text-3xl font-black tracking-tight text-slate-900">Order #{order.id.toString().slice(-6)}</h1>
+               <StatusBadge status={order.status} />
+            </div>
+            <p className="text-slate-500 mt-1 flex items-center gap-2">
+              <Calendar size={14} />
+              <span>Initiated on {formatDate(order.createdAt)}</span>
+            </p>
+          </div>
         </div>
-        <Link className="link" to="/admin/orders">
-          Back to orders
-        </Link>
       </section>
 
-      {status.error && <div className="alert">{status.error}</div>}
-      {status.loading ? (
-        <div className="loading">Loading order...</div>
-      ) : order ? (
-        <div className="admin-grid">
-          <div className="panel admin-animate">
-            <div className="admin-section-header">
-              <div>
-                <h2>Items</h2>
-                <p>Placed on {formatDate(order.createdAt)}.</p>
+      {status.error && <div className="alert bg-red-50 text-red-600 p-4 rounded-2xl border border-red-100 mb-6 font-bold text-sm">{status.error}</div>}
+      
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
+        {/* Left Column: Transaction Details */}
+        <div className="lg:col-span-8 space-y-8">
+          <section className="bg-white border border-slate-200 rounded-[2.5rem] p-8 shadow-sm">
+            <div className="flex items-center gap-3 mb-8">
+              <div className="h-10 w-10 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center">
+                <ShoppingBag size={18} strokeWidth={2.5} />
               </div>
+              <h2 className="text-xl font-black text-slate-800 tracking-tight">Purchase Items</h2>
             </div>
-            <div className="admin-list">
-              {order.items?.length ? (
-                order.items.map((item) => (
-                  <div key={item.id} className="admin-list-row">
-                    <div>
-                      <p className="admin-list-title">{item.product?.title || "Product"}</p>
-                      <p className="admin-list-meta">Qty {item.quantity}</p>
-                    </div>
-                    <span className="admin-pill">{formatPrice(item.price)}</span>
+            
+            <div className="space-y-4">
+              {order.items?.map((item) => (
+                <div key={item.id} className="flex items-center gap-6 p-4 rounded-3xl border border-slate-50 hover:border-slate-100 hover:bg-slate-50/50 transition-all">
+                  <div className="h-16 w-16 rounded-2xl bg-slate-100 overflow-hidden border border-slate-200 flex-shrink-0">
+                    {item.product?.images?.[0] ? (
+                      <img src={item.product.images[0]} alt="" className="w-full h-full object-cover" />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center text-slate-300">
+                        <Package size={24} />
+                      </div>
+                    )}
                   </div>
-                ))
-              ) : (
-                <p className="helper">No items found.</p>
-              )}
-            </div>
-          </div>
-
-          <div className="panel admin-animate">
-            <div className="admin-section-header">
-              <div>
-                <h2>Summary</h2>
-                <p>Customer and shipping details.</p>
-              </div>
-            </div>
-            <div className="admin-summary">
-              <div className="admin-summary-row">
-                <span>Customer</span>
-                <span>{order.user?.email || "-"}</span>
-              </div>
-              <div className="admin-summary-row">
-                <span>Status</span>
-                <span className={`status status-${order.status?.toLowerCase() || "pending"}`}>
-                  {order.status}
-                </span>
-              </div>
-              <div className="admin-summary-row">
-                <span>Total</span>
-                <span>{formatPrice(order.totalAmount)}</span>
-              </div>
-            </div>
-            <div className="admin-summary">
-              <div className="admin-summary-row">
-                <span>Payment method</span>
-                <span>{order.paymentMethod || "razorpay"}</span>
-              </div>
-              {order.paymentId && (
-                <div className="admin-summary-row">
-                  <span>Payment ID</span>
-                  <span>{order.paymentId}</span>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-black text-slate-900 truncate">{item.product?.title || "Legacy Product Item"}</p>
+                    <div className="flex items-center gap-3 mt-1 text-xs font-bold uppercase tracking-widest text-slate-400">
+                      <span>{item.size || "standard"}</span>
+                      <span className="h-1 w-1 rounded-full bg-slate-200"></span>
+                      <span>Qty {item.quantity}</span>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <p className="font-black text-slate-900">{formatPrice(item.price * item.quantity)}</p>
+                    <p className="text-[10px] text-slate-400 font-bold uppercase tracking-tighter">{formatPrice(item.price)} ea.</p>
+                  </div>
                 </div>
-              )}
-              {order.razorpayOrderId && (
-                <div className="admin-summary-row">
-                  <span>Razorpay Order</span>
-                  <span>{order.razorpayOrderId}</span>
-                </div>
-              )}
-              {order.razorpaySignature && (
-                <div className="admin-summary-row">
-                  <span>Signature</span>
-                  <span className="break-all">{order.razorpaySignature}</span>
-                </div>
-              )}
-              {(order.paymentErrorCode || order.paymentErrorDescription) && (
-                <div className="admin-summary-row">
-                  <span>Payment error</span>
-                  <span className="break-all">
-                    {[order.paymentErrorCode, order.paymentErrorDescription].filter(Boolean).join(" - ")}
-                  </span>
-                </div>
-              )}
-            </div>
-            <div className="admin-status-update">
-              <select className="input" value={nextStatus} onChange={(event) => setNextStatus(event.target.value)}>
-                {STATUS_OPTIONS.map((option) => (
-                  <option key={option} value={option}>
-                    {option}
-                  </option>
-                ))}
-              </select>
-              <button className="btn btn-primary" type="button" onClick={handleSave} disabled={status.saving}>
-                {status.saving ? "Updating..." : "Update status"}
-              </button>
+              ))}
             </div>
 
-            <div className="admin-status-update">
-              <div className="flex flex-col gap-2 w-full">
-                <input
-                  className="input"
-                  placeholder="Tracking code"
-                  value={trackingDraft.trackingCode}
-                  onChange={(e) => setTrackingDraft((prev) => ({ ...prev, trackingCode: e.target.value }))}
-                />
-                <input
-                  className="input"
-                  placeholder="Carrier (e.g., Bluedart, Delhivery)"
-                  value={trackingDraft.trackingCarrier}
-                  onChange={(e) => setTrackingDraft((prev) => ({ ...prev, trackingCarrier: e.target.value }))}
-                />
-              </div>
-              <button className="btn btn-outline" type="button" onClick={handleSaveTracking} disabled={status.saving}>
-                {status.saving ? "Saving..." : "Update tracking"}
-              </button>
+            <div className="mt-10 pt-8 border-t border-slate-100 space-y-3">
+               <div className="flex justify-between items-center text-sm font-bold text-slate-500">
+                  <span>Subtotal</span>
+                  <span>{formatPrice(order.totalAmount)}</span>
+               </div>
+               <div className="flex justify-between items-center text-sm font-bold text-slate-500">
+                  <span>Standard Fulfillment</span>
+                  <span className="text-emerald-500">Free</span>
+               </div>
+               <div className="flex justify-between items-center pt-4">
+                  <span className="text-lg font-black text-slate-900">Total Settlement</span>
+                  <span className="text-2xl font-black text-slate-900">{formatPrice(order.totalAmount)}</span>
+               </div>
             </div>
+          </section>
 
-            <div className="admin-address">
-              <h3>Shipping address</h3>
-              {order.user?.name && <p className="font-semibold text-slate-900">{order.user.name}</p>}
-              <p>{order.addressLine1 || "-"}</p>
-              {order.addressLine2 && <p>{order.addressLine2}</p>}
-              <p>{[order.city, order.state, order.postalCode].filter(Boolean).join(", ")}</p>
-              <p>{order.country}</p>
-              <p>{order.phone}</p>
-            </div>
-          </div>
+          <section className="bg-slate-900 border border-slate-800 rounded-[2.5rem] p-8 shadow-2xl">
+             <div className="flex items-center gap-3 mb-8">
+               <div className="h-10 w-10 rounded-2xl bg-white/10 text-white flex items-center justify-center">
+                 <Truck size={18} strokeWidth={2.5} />
+               </div>
+               <h2 className="text-xl font-black text-white tracking-tight">Fullfillment Workflow</h2>
+             </div>
+
+             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+               <div className="space-y-6">
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-black uppercase tracking-[0.2em] text-indigo-400 px-1">Logistic Status</label>
+                    <div className="relative">
+                      <select 
+                        className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-white font-black text-sm outline-none focus:border-indigo-500 transition-all appearance-none"
+                        value={nextStatus} 
+                        onChange={(e) => setNextStatus(e.target.value)}
+                      >
+                        {STATUS_OPTIONS.map((opt) => (
+                          <option key={opt} value={opt} className="text-slate-900">{opt}</option>
+                        ))}
+                      </select>
+                      <ChevronRight size={14} className="absolute right-6 top-1/2 -translate-y-1/2 rotate-90 text-white/30 pointer-events-none" />
+                    </div>
+                  </div>
+                  <button 
+                    className="w-full btn bg-indigo-600 text-white hover:bg-indigo-700 py-4 rounded-2xl shadow-xl shadow-indigo-950 transition-all font-black text-sm uppercase tracking-widest disabled:opacity-50"
+                    onClick={handleSave}
+                    disabled={status.saving || nextStatus === order.status}
+                  >
+                    {status.saving ? "UPDATING..." : "COMMIT STATUS CHANGE"}
+                  </button>
+               </div>
+
+               <div className="space-y-4">
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-black uppercase tracking-[0.2em] text-indigo-400 px-1">Tracking Logistics</label>
+                    <input 
+                      className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-white font-bold text-sm outline-none focus:border-indigo-500 transition-all"
+                      placeholder="Waybill / Tracking #"
+                      value={trackingDraft.trackingCode}
+                      onChange={(e) => setTrackingDraft(p => ({ ...p, trackingCode: e.target.value }))}
+                    />
+                    <input 
+                      className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-white font-bold text-sm outline-none focus:border-indigo-500 transition-all"
+                      placeholder="Carrier (e.g., Delhivery)"
+                      value={trackingDraft.trackingCarrier}
+                      onChange={(e) => setTrackingDraft(p => ({ ...p, trackingCarrier: e.target.value }))}
+                    />
+                  </div>
+                  <button 
+                    className="w-full py-4 rounded-2xl border border-white/10 text-white/60 hover:text-white hover:border-white/30 hover:bg-white/5 transition-all font-black text-xs uppercase tracking-widest flex items-center justify-center gap-2"
+                    onClick={handleSaveTracking}
+                    disabled={status.saving}
+                  >
+                    <Save size={16} />
+                    <span>Synchronize Tracking</span>
+                  </button>
+               </div>
+             </div>
+          </section>
         </div>
-      ) : (
-        <div className="empty-state">Order not found.</div>
-      )}
+
+        {/* Right Column: Customer & Payment */}
+        <div className="lg:col-span-4 space-y-8">
+          <section className="bg-white border border-slate-200 rounded-[2.5rem] p-8 shadow-sm">
+             <div className="flex items-center gap-3 mb-8">
+               <div className="h-10 w-10 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center">
+                 <User size={18} strokeWidth={2.5} />
+               </div>
+               <h2 className="text-xl font-black text-slate-800 tracking-tight">Customer</h2>
+             </div>
+             
+             <div className="flex items-center gap-4 mb-8 p-1">
+                <div className="h-14 w-14 rounded-full bg-slate-100 flex items-center justify-center text-lg font-black text-slate-400 uppercase border-2 border-slate-50">
+                  {order.user?.name?.slice(0, 1) || "G"}
+                </div>
+                <div>
+                  <p className="font-black text-slate-900 leading-tight">{order.user?.name || "Guest Account"}</p>
+                  <p className="text-xs text-slate-400 font-bold uppercase tracking-widest mt-1">ID: #{order.user?.id || "N/A"}</p>
+                </div>
+             </div>
+
+             <div className="space-y-4">
+                <div className="flex items-center gap-3 text-slate-600 group">
+                   <div className="h-8 w-8 rounded-xl bg-slate-50 flex items-center justify-center text-slate-400 group-hover:bg-indigo-50 group-hover:text-indigo-600 transition-all">
+                      <Mail size={14} />
+                   </div>
+                   <span className="text-sm font-bold truncate">{order.user?.email || "No email available"}</span>
+                </div>
+                <div className="flex items-center gap-3 text-slate-600 group">
+                   <div className="h-8 w-8 rounded-xl bg-slate-50 flex items-center justify-center text-slate-400 group-hover:bg-indigo-50 group-hover:text-indigo-600 transition-all">
+                      <Phone size={14} />
+                   </div>
+                   <span className="text-sm font-bold">{order.phone || "No phone listed"}</span>
+                </div>
+             </div>
+
+             <div className="mt-10 pt-8 border-t border-slate-100">
+               <div className="flex items-center gap-3 mb-4">
+                 <MapPin size={16} className="text-indigo-500" />
+                 <h3 className="text-xs font-black uppercase tracking-widest text-slate-400">Shipping Domain</h3>
+               </div>
+               <div className="bg-slate-50 rounded-3xl p-6 text-sm font-bold text-slate-600 leading-relaxed border border-slate-100">
+                 <p className="text-slate-900 font-black mb-1">{order.user?.name || "Recipient"}</p>
+                 <p>{order.addressLine1}</p>
+                 {order.addressLine2 && <p>{order.addressLine2}</p>}
+                 <p>{order.city}, {order.state} {order.postalCode}</p>
+                 <p className="mt-2 text-indigo-600 uppercase text-[10px] tracking-widest font-black">{order.country || "India"}</p>
+               </div>
+             </div>
+          </section>
+
+          <section className="bg-white border border-slate-200 rounded-[2.5rem] p-8 shadow-sm">
+             <div className="flex items-center gap-3 mb-8">
+               <div className="h-10 w-10 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center">
+                 <CreditCard size={18} strokeWidth={2.5} />
+               </div>
+               <h2 className="text-xl font-black text-slate-800 tracking-tight">Payment</h2>
+             </div>
+
+             <div className="space-y-5">
+                <div className="bg-indigo-50/50 rounded-2xl p-4 flex items-center justify-between border border-indigo-100">
+                   <span className="text-[10px] font-black uppercase tracking-widest text-indigo-400">Provider</span>
+                   <span className="text-sm font-black text-indigo-800 uppercase">{order.paymentMethod || "Razorpay"}</span>
+                </div>
+                
+                <div className="grid grid-cols-1 gap-2">
+                   <div className="flex items-center justify-between px-1">
+                      <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Transaction Reference</span>
+                   </div>
+                   <div className="bg-slate-50 rounded-2xl p-4 border border-slate-100 flex flex-col gap-2">
+                      <div className="flex items-center justify-between">
+                         <span className="text-[11px] font-bold text-slate-400">Payment ID</span>
+                         <code className="text-[11px] font-black text-slate-900">{order.paymentId || "Unconfirmed"}</code>
+                      </div>
+                      <div className="flex items-center justify-between">
+                         <span className="text-[11px] font-bold text-slate-400">Gateway Order</span>
+                         <code className="text-[11px] font-black text-slate-900 truncate max-w-[140px]">{order.razorpayOrderId || "N/A"}</code>
+                      </div>
+                   </div>
+                </div>
+
+                {(order.paymentErrorCode || order.paymentErrorDescription) && (
+                  <div className="p-4 rounded-2xl bg-red-50 border border-red-100">
+                    <div className="flex items-center gap-2 text-red-600 mb-1">
+                       <XCircle size={14} />
+                       <span className="text-[10px] font-black uppercase tracking-widest">Gateway Error</span>
+                    </div>
+                    <p className="text-xs text-red-600 font-bold leading-relaxed">
+                      {[order.paymentErrorCode, order.paymentErrorDescription].filter(Boolean).join(": ")}
+                    </p>
+                  </div>
+                )}
+             </div>
+          </section>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function StatusBadge({ status }) {
+  const Icon = STATUS_ICONS[status] || Clock;
+  const colorMap = {
+    PENDING: "bg-slate-100 text-slate-500 border-slate-200",
+    PAID: "bg-indigo-50 text-indigo-600 border-indigo-100",
+    SHIPPED: "bg-blue-50 text-blue-600 border-blue-100",
+    DELIVERED: "bg-emerald-50 text-emerald-600 border-emerald-100",
+    CANCELLED: "bg-red-50 text-red-600 border-red-100",
+  };
+  
+  return (
+    <div className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-[10px] font-black uppercase tracking-widest ${colorMap[status] || colorMap.PENDING}`}>
+      <Icon size={12} strokeWidth={3} />
+      <span>{status}</span>
     </div>
   );
 }

@@ -1,26 +1,35 @@
 import React from "react";
 import { NavLink } from "react-router-dom";
+import { 
+  LayoutDashboard, 
+  Package, 
+  ShoppingBag, 
+  Users, 
+  Layers, 
+  Image as ImageIcon 
+} from "lucide-react";
 
 const navItems = [
-  { to: "/admin", label: "Dashboard" },
-  { to: "/admin/products", label: "Products" },
-  { to: "/admin/orders", label: "Orders" },
-  { to: "/admin/customers", label: "Customers" },
-  { to: "/admin/categories", label: "Categories" },
-  { to: "/admin/hero", label: "Hero Slides" }
+  { to: "/admin", label: "Dashboard", Icon: LayoutDashboard },
+  { to: "/admin/products", label: "Products", Icon: Package },
+  { to: "/admin/orders", label: "Orders", Icon: ShoppingBag },
+  { to: "/admin/customers", label: "Customers", Icon: Users },
+  { to: "/admin/categories", label: "Categories", Icon: Layers },
+  { to: "/admin/hero", label: "Hero Slides", Icon: ImageIcon }
 ];
 
 export default function AdminNav() {
   return (
     <nav className="admin-nav">
-      {navItems.map((item) => (
+      {navItems.map(({ to, label, Icon }) => (
         <NavLink
-          key={item.to}
-          to={item.to}
-          end={item.to === "/admin"}
+          key={to}
+          to={to}
+          end={to === "/admin"}
           className={({ isActive }) => (isActive ? "admin-link active" : "admin-link")}
         >
-          {item.label}
+          <Icon size={18} strokeWidth={2.5} />
+          <span>{label}</span>
         </NavLink>
       ))}
     </nav>

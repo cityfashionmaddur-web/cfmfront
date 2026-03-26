@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
 import { Link } from "react-router-dom";
-import { ShoppingBag } from "lucide-react";
+import { ShoppingBag, X } from "lucide-react";
 import { useCart } from "../context/CartContext.jsx";
 import { formatPrice } from "../utils/format.js";
 
@@ -23,111 +23,101 @@ export default function MiniCartDrawer() {
 
   return (
     <div
-      className="fixed inset-0 z-50 hidden items-end bg-black/50 backdrop-blur-sm md:flex md:items-start md:justify-end"
+      className="fixed inset-0 z-50 flex items-stretch justify-end bg-black/60 backdrop-blur-sm transition-opacity"
       onClick={closeDrawer}
       aria-modal="true"
       role="dialog"
     >
       <aside
-        className="relative flex h-[80vh] w-full max-w-full flex-col overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-2xl transition-transform duration-200 md:max-w-lg"
+        className="relative flex h-full w-full max-w-md flex-col overflow-hidden bg-white shadow-2xl transition-transform duration-500 ease-[0.16,1,0.3,1]"
         onClick={(event) => event.stopPropagation()}
       >
-        <div className="flex items-start justify-between border-b border-slate-200 px-4 py-4 sm:px-6">
-          <div className="absolute left-1/2 top-2 block h-1.5 w-16 -translate-x-1/2 rounded-full bg-slate-200 md:hidden" aria-hidden />
+        {/* Header */}
+        <div className="flex items-center justify-between border-b border-gray-100 px-6 py-6">
           <div>
-            <p className="text-[11px] uppercase tracking-[0.25em] text-slate-500">Mini bag</p>
-            <p className="text-xl font-semibold text-slate-900">
-              {items.length ? `${items.length} item${items.length > 1 ? "s" : ""}` : "Your cart is empty"}
+            <p className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 mb-1">Your Bag</p>
+            <p className="text-xl font-heading font-bold text-ink tracking-tight">
+              {items.length ? `${items.length} Item${items.length > 1 ? "s" : ""}` : "Empty"}
             </p>
           </div>
           <button
             type="button"
             onClick={closeDrawer}
-            className="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-900 shadow-sm transition hover:-translate-y-0.5 hover:shadow"
-            aria-label="Close mini cart"
+            className="p-2 text-gray-400 hover:text-ink transition-colors"
+            aria-label="Close"
           >
-            Close
+            <X strokeWidth={1.5} size={24} />
           </button>
         </div>
 
-        <div className="flex flex-1 flex-col overflow-y-auto px-4 py-4 sm:px-6">
+        {/* Content */}
+        <div className="flex flex-1 flex-col overflow-y-auto px-6 py-6 scrollbar-hide">
           {items.length === 0 ? (
-            <div className="flex flex-1 flex-col items-center justify-center space-y-4 px-4 py-8 text-center">
-              <div className="flex h-16 w-16 items-center justify-center rounded-full bg-slate-50">
-                <ShoppingBag className="h-8 w-8 text-slate-300" />
-              </div>
-              <div className="space-y-1">
-                <p className="text-lg font-semibold text-slate-900">Your cart is empty</p>
-                <p className="text-sm text-slate-500 max-w-xs mx-auto">
-                  Looks like you haven't added anything to your cart yet.
-                </p>
+            <div className="flex flex-1 flex-col items-center justify-center space-y-6 text-center">
+              <ShoppingBag className="h-12 w-12 text-gray-200" strokeWidth={1} />
+              <div className="space-y-2">
+                <p className="text-lg font-heading font-bold text-ink">Your bag is empty</p>
+                <p className="text-sm text-gray-500">Discover our latest arrivals.</p>
               </div>
               <Link
                 to="/products"
                 onClick={closeDrawer}
-                className="mt-4 inline-flex items-center justify-center rounded-full bg-slate-900 px-6 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-slate-800 transition-colors"
+                className="btn-primary mt-4"
               >
-                Start Shopping
+                Shop Now
               </Link>
             </div>
           ) : (
-            <div className="space-y-3">
+            <div className="space-y-6">
               {items.map((item) => (
-                <div
-                  key={item.id}
-                  className="grid gap-3 rounded-2xl border border-slate-200 bg-white/90 p-3 shadow-sm sm:grid-cols-[auto_1fr_auto]"
-                >
-                  <div className="flex items-start gap-3">
-                    <div className="h-16 w-16 overflow-hidden rounded-2xl border border-slate-200 bg-slate-50">
-                      {item.image ? (
-                        <img src={item.image} alt={item.title} className="h-full w-full object-cover" />
-                      ) : (
-                        <div className="flex h-full w-full items-center justify-center text-xs text-slate-500">No image</div>
-                      )}
-                    </div>
-                    <div className="space-y-1">
-                      <Link
-                        to={`/products/${item.slug}`}
-                        className="line-clamp-2 font-semibold text-slate-900 hover:underline"
-                        onClick={closeDrawer}
-                      >
-                        {item.title}
-                      </Link>
-                      <p className="text-sm font-semibold text-slate-900">{formatPrice(item.price)}</p>
-                    </div>
+                <div key={item.id} className="flex gap-4">
+                  <div className="h-28 w-24 flex-shrink-0 bg-gray-50 aspect-[3/4]">
+                    {item.image ? (
+                      <img src={item.image} alt={item.title} className="h-full w-full object-cover" />
+                    ) : (
+                      <div className="flex h-full w-full items-center justify-center text-[9px] uppercase tracking-widest text-gray-400">No Img</div>
+                    )}
                   </div>
+                  
+                  <div className="flex flex-1 flex-col justify-between py-1">
+                    <div>
+                      <div className="flex justify-between items-start gap-2">
+                        <Link
+                          to={`/products/${item.slug}`}
+                          className="text-xs font-bold uppercase tracking-widest text-ink hover:text-gray-500 line-clamp-2"
+                          onClick={closeDrawer}
+                        >
+                          {item.title}
+                        </Link>
+                        <p className="text-sm font-medium text-ink whitespace-nowrap">{formatPrice(item.price)}</p>
+                      </div>
+                    </div>
 
-                  <div className="flex items-center gap-3 sm:justify-center">
-                    <div className="flex items-center rounded-full border border-slate-200 bg-slate-50 shadow-sm">
+                    <div className="flex items-center justify-between mt-4">
+                      {/* Quantity Control */}
+                      <div className="flex items-center border border-gray-200">
+                        <button
+                          className="px-3 py-1 text-ink hover:bg-gray-50 transition-colors"
+                          onClick={() => updateQuantity(item.id, Math.max(1, (item.quantity || 1) - 1))}
+                        >
+                          −
+                        </button>
+                        <span className="w-8 text-center text-xs font-bold">{item.quantity || 1}</span>
+                        <button
+                          className="px-3 py-1 text-ink hover:bg-gray-50 transition-colors"
+                          onClick={() => updateQuantity(item.id, (item.quantity || 1) + 1)}
+                        >
+                          +
+                        </button>
+                      </div>
+                      
                       <button
-                        className="px-3 py-1.5 text-sm text-slate-500 transition hover:text-slate-900"
-                        onClick={() => updateQuantity(item.id, Math.max(1, (item.quantity || 1) - 1))}
-                        aria-label={`Decrease quantity of ${item.title}`}
+                        onClick={() => removeItem(item.id)}
+                        className="text-[10px] font-bold uppercase tracking-widest text-gray-400 hover:text-red-500 underline underline-offset-4"
                       >
-                        −
-                      </button>
-                      <span className="px-3 text-sm font-semibold text-slate-900">{item.quantity || 1}</span>
-                      <button
-                        className="px-3 py-1.5 text-sm text-slate-500 transition hover:text-slate-900"
-                        onClick={() => updateQuantity(item.id, (item.quantity || 1) + 1)}
-                        aria-label={`Increase quantity of ${item.title}`}
-                      >
-                        +
+                        Remove
                       </button>
                     </div>
-                    <button
-                      onClick={() => removeItem(item.id)}
-                      className="text-xs font-semibold text-rose-500 hover:text-rose-600"
-                    >
-                      Remove
-                    </button>
-                  </div>
-
-                  <div className="flex flex-col items-end justify-between gap-1 text-right">
-                    <p className="text-xs uppercase tracking-[0.15em] text-slate-500">Line total</p>
-                    <p className="text-sm font-semibold text-slate-900">
-                      {formatPrice(Number(item.price || 0) * (item.quantity || 1))}
-                    </p>
                   </div>
                 </div>
               ))}
@@ -135,68 +125,57 @@ export default function MiniCartDrawer() {
           )}
         </div>
 
-        <div className="space-y-4 border-t border-slate-200 bg-white px-4 py-4 sm:px-6">
-          <div className="space-y-2 rounded-xl bg-slate-50 p-3">
-            <div className="flex items-center justify-between text-xs text-slate-700">
-              <span className="font-semibold text-slate-900">
-                {freeShipRemaining === 0 ? "Free delivery unlocked" : "Free delivery progress"}
-              </span>
-              <span className="text-[11px] text-slate-600">
-                {freeShipRemaining === 0 ? "₹0 left" : `${formatPrice(freeShipRemaining)} to go`}
-              </span>
+        {/* Footer */}
+        {items.length > 0 && (
+          <div className="border-t border-gray-100 bg-white px-6 py-6">
+            <div className="space-y-4 mb-6">
+              <div className="space-y-2">
+                <div className="flex items-center justify-between text-[10px] font-black uppercase tracking-[0.2em] text-ink">
+                  <span>{freeShipRemaining === 0 ? "Free Shipping Unlocked" : "Progress to Free Shipping"}</span>
+                  <span className="text-gray-500">{freeShipRemaining === 0 ? "₹0 Left" : `${formatPrice(freeShipRemaining)} Away`}</span>
+                </div>
+                <div className="h-1 w-full bg-gray-100">
+                  <div
+                    className="h-1 bg-ink transition-all duration-500 ease-out"
+                    style={{ width: `${freeShipProgress}%` }}
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-2 text-sm pt-2">
+                <div className="flex justify-between text-gray-500">
+                  <span>Subtotal</span>
+                  <span className="text-ink font-medium">{formatPrice(subtotal)}</span>
+                </div>
+                <div className="flex justify-between text-gray-500">
+                  <span>Shipping</span>
+                  <span className="text-ink font-medium">{formatPrice(shippingFee)}</span>
+                </div>
+                <div className="flex justify-between text-ink border-t border-gray-100 pt-3 mt-3">
+                  <span className="font-bold uppercase tracking-widest text-xs">Total</span>
+                  <span className="font-bold text-lg">{formatPrice(total)}</span>
+                </div>
+              </div>
             </div>
-            <div className="h-2 rounded-full bg-slate-200">
-              <div
-                className="h-2 rounded-full bg-slate-900 transition-all"
-                style={{ width: `${freeShipProgress}%` }}
-              />
+
+            <div className="space-y-3">
+              <Link
+                to="/checkout"
+                onClick={closeDrawer}
+                className="btn-primary w-full block text-center"
+              >
+                Checkout
+              </Link>
+              <Link
+                to="/cart"
+                onClick={closeDrawer}
+                className="btn-secondary w-full block text-center"
+              >
+                View Bag
+              </Link>
             </div>
           </div>
-          <div className="space-y-1 text-sm text-slate-600">
-            <div className="flex items-center justify-between">
-              <span>Subtotal</span>
-              <span className="text-base font-semibold text-slate-900">{formatPrice(subtotal)}</span>
-            </div>
-            <div className="flex items-center justify-between">
-              <span>Delivery fee</span>
-              <span className="text-base font-semibold text-slate-900">{formatPrice(shippingFee)}</span>
-            </div>
-            <div className="flex items-center justify-between text-slate-900 font-semibold">
-              <span>Total</span>
-              <span className="text-base">{formatPrice(total)}</span>
-            </div>
-          </div>
-          <div className="flex flex-wrap gap-2 text-[11px] font-semibold text-slate-600">
-            <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2.5 py-1 ring-1 ring-slate-200">
-              🔒 Secure payment (Razorpay)
-            </span>
-            <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2.5 py-1 ring-1 ring-slate-200">
-              Taxes included
-            </span>
-          </div>
-          <div className="flex flex-col gap-2 sm:flex-row">
-            <Link
-              to="/checkout"
-              onClick={closeDrawer}
-              className="flex-1 rounded-full bg-slate-900 px-4 py-3 text-center text-sm font-semibold text-white shadow transition hover:-translate-y-0.5 hover:shadow-lg"
-            >
-              Checkout now
-            </Link>
-            <Link
-              to="/cart"
-              onClick={closeDrawer}
-              className="flex-1 rounded-full border border-slate-200 bg-white px-4 py-3 text-center text-sm font-semibold text-slate-900 shadow-sm transition hover:-translate-y-0.5 hover:shadow"
-            >
-              View cart
-            </Link>
-          </div>
-          <button
-            onClick={closeDrawer}
-            className="w-full rounded-full border border-transparent bg-transparent px-4 py-2 text-sm font-semibold text-slate-600 transition hover:text-slate-900"
-          >
-            Keep browsing
-          </button>
-        </div>
+        )}
       </aside>
     </div>
   );

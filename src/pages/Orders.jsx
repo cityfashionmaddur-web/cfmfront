@@ -3,6 +3,18 @@ import { Link } from "react-router-dom";
 import { apiGet } from "../utils/api.js";
 import { useAuth } from "../context/AuthContext.jsx";
 import { formatDate, formatPrice } from "../utils/format.js";
+import { Package, Truck, CheckCircle, Clock, XCircle, ChevronRight, ShoppingBag } from "lucide-react";
+
+const getStatusIcon = (status) => {
+  switch (status?.toUpperCase()) {
+    case 'PENDING': return <Clock size={16} strokeWidth={2} />;
+    case 'PAID': return <CheckCircle size={16} strokeWidth={2} />;
+    case 'SHIPPED': return <Truck size={16} strokeWidth={2} />;
+    case 'DELIVERED': return <Package size={16} strokeWidth={2} />;
+    case 'CANCELLED': return <XCircle size={16} strokeWidth={2} />;
+    default: return <Clock size={16} strokeWidth={2} />;
+  }
+};
 
 export default function Orders() {
   const { isAuthenticated, user } = useAuth();
@@ -37,97 +49,132 @@ export default function Orders() {
 
   if (!isAuthenticated) {
     return (
-      <div className="flex flex-col items-center gap-3 rounded-3xl border border-dashed border-slate-300 bg-white/70 p-10 text-center shadow-inner">
-        <h2 className="text-2xl font-semibold">Login required</h2>
-        <p className="text-slate-600">Sign in to view your order history.</p>
-        <Link className="rounded-full bg-slate-900 px-4 py-2 text-sm font-semibold text-white shadow-lg" to="/login">
-          Go to login
+      <div className="min-h-[70vh] flex flex-col items-center justify-center p-8">
+        <h2 className="text-3xl font-black uppercase tracking-widest mb-4">Authentication Required</h2>
+        <p className="text-gray-500 mb-8 max-w-sm text-center">Gain access to your exclusive purchase history by signing in to your account.</p>
+        <Link className="px-8 py-3 bg-black text-white text-sm font-black uppercase tracking-widest hover:bg-neutral-800 transition-colors" to="/login">
+          Sign In
         </Link>
       </div>
     );
   }
 
   return (
-    <div className="flex flex-col gap-8 pt-12">
-      <section className="flex flex-wrap items-center justify-between gap-4">
+    <div className="max-w-6xl mx-auto px-6 py-16 md:py-24">
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-16 border-b border-gray-200 pb-8">
         <div>
-          <h1 className="text-3xl font-semibold">Your Orders</h1>
-          <p className="text-slate-600">Track the status of every purchase.</p>
-          {user?.name && <p className="text-sm text-slate-500">Signed in as {user.name}</p>}
+          <h1 className="text-5xl font-black uppercase tracking-tighter mb-2">Order Archive</h1>
+          <p className="text-gray-500 tracking-wide">A comprehensive record of your acquisitions.</p>
         </div>
-      </section>
+        <div className="text-sm font-bold uppercase tracking-widest text-gray-400">
+          Client: {user?.name || "Guest"}
+        </div>
+      </div>
 
       {error && (
-        <div className="rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
+        <div className="bg-black text-white px-6 py-4 mb-8 text-sm font-bold uppercase tracking-widest flex items-center gap-3">
+          <XCircle size={18} />
           {error}
         </div>
       )}
+      
       {loading ? (
-        <div className="grid gap-3">
-          {[...Array(4)].map((_, idx) => (
-            <div key={idx} className="animate-pulse rounded-2xl border border-slate-200 bg-white/80 p-4 shadow">
-              <div className="flex items-center justify-between">
-                <div className="h-4 w-24 rounded bg-slate-200" />
-                <div className="h-4 w-20 rounded bg-slate-200" />
-              </div>
-              <div className="mt-2 h-4 w-32 rounded bg-slate-200" />
-              <div className="mt-3 h-12 rounded bg-slate-200" />
-            </div>
+        <div className="space-y-8">
+          {[...Array(3)].map((_, idx) => (
+            <div key={idx} className="animate-pulse bg-neutral-100 h-64 w-full"></div>
           ))}
         </div>
       ) : (
-        <div className="flex flex-col gap-4">
+        <div className="space-y-12">
           {orders.length ? (
             orders.map((order) => (
               <div
                 key={order.id}
-                className="flex flex-col gap-3 rounded-2xl border border-slate-200 bg-white/90 p-4 shadow"
+                className="group border border-gray-200 hover:border-black transition-colors bg-white overflow-hidden flex flex-col lg:flex-row"
               >
-                <div className="flex flex-wrap items-start justify-between gap-3">
-                  <div>
-                    <p className="m-0 text-lg font-semibold text-slate-900">Order #{order.id}</p>
-                    <p className="m-0 text-sm text-slate-600">Placed on {formatDate(order.createdAt)}</p>
-                    <p className="m-0 text-sm text-slate-600">Payment method: {order.paymentMethod || "razorpay"}</p>
-                  </div>
-                  <div className="text-right">
-                    {order.status && (
-                      <span
-                        className={`inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs font-semibold uppercase ${
-                          order.status?.toLowerCase() === "paid"
-                            ? "border-emerald-200 bg-emerald-50 text-emerald-700"
-                            : order.status?.toLowerCase() === "cancelled"
-                            ? "border-rose-200 bg-rose-50 text-rose-700"
-                            : "border-slate-200 bg-slate-100 text-slate-700"
-                        }`}
-                      >
-                        {order.status === "CANCELLED" && order.paymentMethod === "razorpay"
-                          ? "FAILED"
-                          : order.status}
-                      </span>
-                    )}
-                    <p className="m-0 mt-2 font-semibold text-slate-900">{formatPrice(order.totalAmount)}</p>
+                {/* Order Summary & Status Header */}
+                <div className="lg:w-1/3 bg-neutral-50 p-8 flex flex-col justify-between border-b lg:border-b-0 lg:border-r border-gray-200">
+                   <div>
+                     <div className="flex items-center gap-3 mb-6">
+                       <span className={`inline-flex items-center gap-2 px-3 py-1 text-xs font-black uppercase tracking-widest ${
+                          order.status === "CANCELLED" ? "bg-red-50 text-red-600" : "bg-black text-white"
+                       }`}>
+                         {getStatusIcon(order.status)}
+                         {order.status === "CANCELLED" && order.paymentMethod === "razorpay"
+                           ? "FAILED"
+                           : order.status}
+                       </span>
+                     </div>
+                     <p className="text-3xl font-black tracking-tight mb-2">#{order.id.toString().padStart(5, '0')}</p>
+                     <p className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-6">Placed on {formatDate(order.createdAt)}</p>
+                     
+                     <div className="space-y-4 text-sm mb-8">
+                       <div className="flex justify-between border-b border-gray-200 pb-2">
+                         <span className="font-bold text-gray-500">Logistics</span>
+                         <span className="font-black tracking-wide text-right">{order.trackingCarrier || "Standard"}</span>
+                       </div>
+                       {order.trackingCode && (
+                         <div className="flex justify-between border-b border-gray-200 pb-2">
+                           <span className="font-bold text-gray-500">Waybill</span>
+                           <span className="font-black tracking-wide">{order.trackingCode}</span>
+                         </div>
+                       )}
+                       <div className="flex justify-between pb-2">
+                         <span className="font-bold text-gray-500">Payment</span>
+                         <span className="font-black tracking-wide uppercase">{order.paymentMethod || "razorpay"}</span>
+                       </div>
+                     </div>
+                   </div>
+
+                   <div className="pt-6 border-t border-gray-200">
+                     <p className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-1">Total Settlement</p>
+                     <p className="text-2xl font-black">{formatPrice(order.totalAmount)}</p>
+                   </div>
+                </div>
+
+                {/* Items List */}
+                <div className="lg:w-2/3 p-8">
+                  <h3 className="text-xs font-black uppercase tracking-widest text-gray-400 mb-6 flex items-center gap-2">
+                     <ShoppingBag size={14} /> Itemization
+                  </h3>
+                  <div className="space-y-6">
+                    {order.items?.map((item, idx) => (
+                      <div key={idx} className="flex gap-6 group/item">
+                        <div className="w-24 h-32 bg-neutral-100 overflow-hidden flex-shrink-0">
+                          {item.product?.images?.[0] ? (
+                            <img src={item.product.images[0]} alt={item.product?.title} className="w-full h-full object-cover grayscale group-hover/item:grayscale-0 transition-all duration-500" />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center text-gray-300">
+                              <Package size={24} />
+                            </div>
+                          )}
+                        </div>
+                        <div className="flex flex-col justify-center flex-1">
+                          <h4 className="text-lg font-black tracking-tight mb-1 group-hover/item:text-gray-600 transition-colors">
+                            {item.product?.title || "Legacy Product Item"}
+                          </h4>
+                          <div className="flex items-center gap-3 text-xs font-bold uppercase tracking-widest text-gray-500 mb-3">
+                            <span>{item.size || "Standard"}</span>
+                            <span className="w-1 h-1 rounded-full bg-gray-300"></span>
+                            <span>Qty: {item.quantity}</span>
+                          </div>
+                          <p className="font-black text-gray-900">{formatPrice(item.price)}</p>
+                        </div>
+                      </div>
+                    ))}
                   </div>
                 </div>
-                {(order.paymentId || order.razorpayOrderId || order.razorpaySignature) && (
-                  <div className="rounded-xl bg-slate-50 p-3 text-sm text-slate-700">
-                    <p className="m-0 font-semibold text-slate-800">Payment details</p>
-                    {order.paymentId && <p className="m-0">Payment ID: {order.paymentId}</p>}
-                    {order.razorpayOrderId && <p className="m-0">Razorpay Order: {order.razorpayOrderId}</p>}
-                    {order.razorpaySignature && <p className="m-0">Signature: {order.razorpaySignature}</p>}
-                  </div>
-                )}
-                {(order.trackingCode || order.trackingCarrier) && (
-                  <div className="rounded-xl bg-slate-50 p-3 text-sm text-slate-700">
-                    <p className="m-0 font-semibold text-slate-800">Tracking</p>
-                    {order.trackingCode && <p className="m-0">Code: {order.trackingCode}</p>}
-                    {order.trackingCarrier && <p className="m-0">Carrier: {order.trackingCarrier}</p>}
-                  </div>
-                )}
+
               </div>
             ))
           ) : (
-            <div className="flex flex-col items-center gap-2 rounded-2xl border border-dashed border-slate-300 bg-white/70 p-10 text-center text-slate-500 shadow-inner">
-              No orders yet.
+            <div className="border border-gray-200 bg-neutral-50 px-8 py-24 flex flex-col items-center justify-center text-center">
+              <ShoppingBag size={48} className="text-gray-200 mb-6" strokeWidth={1} />
+              <h3 className="text-xl font-black uppercase tracking-widest mb-2">No Acquisitions Found</h3>
+              <p className="text-gray-500 mb-8 max-w-sm">Your order archive is currently empty. Discover our latest collection to begin your journey.</p>
+              <Link className="px-8 py-3 bg-black text-white text-xs font-black uppercase tracking-widest hover:bg-neutral-800 transition-colors" to="/products">
+                Explore Collection
+              </Link>
             </div>
           )}
         </div>

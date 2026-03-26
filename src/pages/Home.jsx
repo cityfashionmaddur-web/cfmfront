@@ -11,25 +11,24 @@ const SORT_OPTIONS = [
   { value: "price_desc", label: "Price: High to Low" }
 ];
 
-// ... (Keep your existing fallbackSlides and mapHeroSlides helper functions exactly as they were) ...
 const fallbackSlides = [
   {
-    badge: "New Season",
-    title: "Signature silhouettes made for the city.",
-    subtitle: "Layerable textures, sculpted tailoring, and bold accessories.",
+    badge: "The Lookbook",
+    title: "Editorial Edge",
+    subtitle: "High contrast silhouettes and modern minimalism.",
     image: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?auto=format&fit=crop&w=1400&q=80",
-    caption: "City Capsule '24",
-    tags: ["Tailored", "Monochrome"],
-    ctas: [{ label: "Shop capsule", href: "/products?sort=newest", variant: "primary" }]
+    caption: "Chapter 01",
+    tags: ["Monochrome", "Structured"],
+    ctas: [{ label: "Explore Collection", href: "/products?sort=newest", variant: "primary" }]
   },
   {
-    badge: "Limited drop",
-    title: "Evening edit with luminous details.",
-    subtitle: "Draped silhouettes and metallic accents curated for after-hours.",
+    badge: "New Arrivals",
+    title: "Abstract Forms",
+    subtitle: "Fluid drapery meets sharp tailoring.",
     image: "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=1400&q=80",
-    caption: "Evening Stories",
-    tags: ["Metallic", "Occasion"],
-    ctas: [{ label: "Shop evening", href: "/products?sort=price_desc", variant: "primary" }]
+    caption: "Chapter 02",
+    tags: ["Tailored", "Flow"],
+    ctas: [{ label: "Shop The Pieces", href: "/products?sort=price_desc", variant: "primary" }]
   }
 ];
 
@@ -101,49 +100,53 @@ export default function Home() {
   const pagination = useMemo(() => Array.from({ length: pages }), [pages]);
 
   return (
-    <div className="pt-12 pb-20">
+    <div className="pt-20 pb-32">
       {/* 1. Hero Section (Full Bleed) */}
       <HeroCarousel slides={slides} />
 
       {/* 2. Editorial Banner (High Contrast Break) */}
-      <section className="bg-slate-900 text-white py-16 lg:py-24 my-12">
-        <div className="container mx-auto px-4 text-center max-w-3xl">
-          <span className="text-xs font-bold uppercase tracking-widest text-slate-400 mb-4 block">
-            The Edit
+      <section className="bg-ink text-white py-24 lg:py-40 my-24 overflow-hidden relative">
+        <div className="container mx-auto px-6 text-center max-w-4xl relative z-10">
+          <span className="text-[10px] font-black uppercase tracking-[0.3em] text-gray-400 mb-8 block">
+            The Exhibition
           </span>
-          <h2 className="text-3xl lg:text-5xl font-serif font-light mb-6 leading-tight">
-            Textured layers & sculpted tailoring.
+          <h2 className="text-4xl lg:text-7xl font-heading font-black uppercase tracking-tighter mb-8 leading-[0.9]">
+            Architectural Curations
           </h2>
-          <p className="text-slate-300 mb-8 font-light text-lg">
-             A curation of our favorite pieces for the transitioning season.
+          <p className="text-gray-300 mb-12 font-medium uppercase tracking-widest text-xs md:text-sm max-w-2xl mx-auto">
+             A study in stark contrasts and refined structures. Explore the foundational garments defining the new season.
           </p>
-          <div className="flex flex-wrap justify-center gap-3">
+          <div className="flex flex-wrap justify-center gap-4">
              {categories?.slice(0, 4).map((category) => (
                 <Link
                   key={category.id}
                   to={`/categories/${category.slug}`}
-                  className="px-6 py-2 border border-white/20 rounded-full hover:bg-white hover:text-slate-900 transition-colors text-sm font-medium"
+                  className="btn-secondary border-gray-600 text-white hover:border-white hover:bg-white hover:text-ink"
                 >
                   {category.name}
                 </Link>
              ))}
           </div>
         </div>
+        {/* Subtle decorative typography in background */}
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 opacity-5 pointer-events-none whitespace-nowrap overflow-hidden">
+           <h2 className="text-[15rem] font-heading font-black uppercase tracking-tighter leading-none">CITYFASHION</h2>
+        </div>
       </section>
 
       {/* 3. Main Product Feed */}
-      <section className="container mx-auto px-4 lg:px-8">
+      <section className="container mx-auto px-6 lg:px-12">
 
         {/* Header & Sort Controls */}
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-10 border-b border-slate-100 pb-4">
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-8 mb-16 border-b border-gray-200 pb-6">
           <div>
-            <h2 className="text-2xl font-light text-slate-900">New Arrivals</h2>
-            <p className="text-slate-500 mt-1 text-sm">
-              Page {page} of {pages}
+            <h2 className="text-3xl font-heading font-black uppercase tracking-tight text-ink">The Catalog</h2>
+            <p className="text-gray-400 mt-2 text-xs font-bold uppercase tracking-widest">
+              Page {page} // {pages}
             </p>
           </div>
 
-          <div className="flex items-center gap-1 overflow-x-auto pb-2 md:pb-0">
+          <div className="flex items-center gap-2 overflow-x-auto pb-2 md:pb-0 scrollbar-hide">
             {SORT_OPTIONS.map((option) => {
               const params = new URLSearchParams({ page: "1", limit: String(PAGE_SIZE), sort: option.value });
               const isActive = option.value === sort;
@@ -151,10 +154,10 @@ export default function Home() {
                 <Link
                   key={option.value}
                   to={`/?${params.toString()}`}
-                  className={`px-4 py-2 text-sm font-medium rounded-full transition-colors whitespace-nowrap ${
+                  className={`px-4 py-2 text-[10px] font-black uppercase tracking-widest transition-colors whitespace-nowrap border ${
                     isActive
-                      ? "bg-slate-900 text-white"
-                      : "text-slate-600 hover:bg-slate-100"
+                      ? "bg-ink text-white border-ink"
+                      : "bg-transparent text-gray-500 border-gray-200 hover:border-ink hover:text-ink"
                   }`}
                 >
                   {option.label}
@@ -165,33 +168,35 @@ export default function Home() {
         </div>
 
         {error && (
-          <div className="p-4 mb-8 bg-rose-50 text-rose-700 rounded-lg text-sm text-center">
+          <div className="p-6 mb-12 bg-red-50 text-red-600 font-bold uppercase tracking-widest text-xs text-center border border-red-100">
             {error}
           </div>
         )}
 
         {loading ? (
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-x-6 gap-y-12">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-x-4 md:gap-x-8 gap-y-12 md:gap-y-16">
             {[...Array(8)].map((_, idx) => (
               <div key={idx} className="space-y-4">
-                <div className="bg-slate-100 aspect-[4/5] w-full animate-pulse" />
-                <div className="h-4 bg-slate-100 w-2/3 animate-pulse" />
-                <div className="h-4 bg-slate-100 w-1/4 animate-pulse" />
+                <div className="bg-gray-100 aspect-[3/4] w-full animate-pulse" />
+                <div className="flex flex-col items-center gap-2">
+                  <div className="h-3 bg-gray-100 w-1/2 animate-pulse" />
+                  <div className="h-3 bg-gray-100 w-1/4 animate-pulse" />
+                </div>
               </div>
             ))}
           </div>
         ) : (
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-x-4 md:gap-x-6 gap-y-10 md:gap-y-14">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-x-4 md:gap-x-8 gap-y-12 md:gap-y-16">
             {products.map((product) => (
               <ProductCard key={product.id} product={product} />
             ))}
           </div>
         )}
 
-        {/* Minimal Pagination */}
+        {/* Minimal Editorial Pagination */}
         {pages > 1 && (
-          <div className="flex justify-center mt-16 border-t border-slate-100 pt-8">
-            <div className="flex gap-2">
+          <div className="flex justify-center mt-24">
+            <div className="flex gap-4">
               {pagination.map((_, idx) => {
                 const params = new URLSearchParams({
                   page: String(idx + 1),
@@ -203,13 +208,13 @@ export default function Home() {
                   <Link
                     key={idx}
                     to={`/?${params.toString()}`}
-                    className={`w-10 h-10 flex items-center justify-center rounded-full text-sm font-medium transition-all ${
+                    className={`w-12 h-12 flex items-center justify-center text-[10px] font-black uppercase tracking-widest transition-all border ${
                       isActive
-                        ? "bg-slate-900 text-white"
-                        : "text-slate-600 hover:bg-slate-100"
+                        ? "bg-ink text-white border-ink"
+                        : "bg-transparent text-gray-400 border-gray-200 hover:border-ink hover:text-ink"
                     }`}
                   >
-                    {idx + 1}
+                    {String(idx + 1).padStart(2, '0')}
                   </Link>
                 );
               })}

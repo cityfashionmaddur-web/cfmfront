@@ -1,6 +1,23 @@
 import React, { useEffect, useRef, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { adminGet, adminPost, adminPut, uploadProductImage } from "../../utils/adminApi.js";
+import { 
+  ArrowLeft, 
+  Layout, 
+  Sparkles, 
+  ImageIcon, 
+  Upload, 
+  Eye, 
+  Save, 
+  Type, 
+  Link as LinkIcon,
+  MousePointer2,
+  Settings2,
+  CheckCircle2,
+  XCircle,
+  ChevronRight,
+  Monitor
+} from "lucide-react";
 
 const emptyForm = {
   title: "",
@@ -23,7 +40,7 @@ export default function AdminHeroForm({ mode = "edit" }) {
   const navigate = useNavigate();
   const fileInputRef = useRef(null);
   const [form, setForm] = useState(emptyForm);
-  const [status, setStatus] = useState({ loading: false, saving: false, uploading: false, error: "" });
+  const [status, setStatus] = useState({ loading: false, saving: false, uploading: false, error: "", success: "" });
 
   useEffect(() => {
     if (!isEdit) return;
@@ -87,7 +104,7 @@ export default function AdminHeroForm({ mode = "edit" }) {
       setStatus((prev) => ({ ...prev, error: "Title and image are required." }));
       return;
     }
-    setStatus((prev) => ({ ...prev, saving: true, error: "" }));
+    setStatus((prev) => ({ ...prev, saving: true, error: "", success: "" }));
 
     const payload = {
       ...form,
@@ -99,10 +116,12 @@ export default function AdminHeroForm({ mode = "edit" }) {
     try {
       if (isEdit) {
         await adminPut(`/admin/hero/${id}`, payload);
+        setStatus((prev) => ({ ...prev, success: "Hero story updated." }));
       } else {
         await adminPost("/admin/hero", payload);
+        setStatus((prev) => ({ ...prev, success: "New hero slide published." }));
       }
-      navigate("/admin/hero");
+      setTimeout(() => navigate("/admin/hero"), 1000);
     } catch (err) {
       setStatus((prev) => ({ ...prev, error: err.message || "Failed to save slide." }));
     } finally {
@@ -110,136 +129,241 @@ export default function AdminHeroForm({ mode = "edit" }) {
     }
   };
 
+  if (status.loading) {
+    return (
+      <div className="flex flex-col items-center justify-center py-40">
+        <div className="h-12 w-12 border-4 border-slate-100 border-t-indigo-600 rounded-full animate-spin"></div>
+        <p className="mt-6 text-slate-500 font-bold tracking-tight">Syncing visual assets...</p>
+      </div>
+    );
+  }
+
   return (
-    <div className="page-stack">
-      <section className="section-header">
-        <div>
-          <h1>{isEdit ? `Edit Slide #${id}` : "Add Hero Slide"}</h1>
-          <p>{isEdit ? "Update carousel visuals." : "Create a new hero story."}</p>
-        </div>
-        <Link className="link" to="/admin/hero">
-          Back to slides
-        </Link>
-      </section>
-
-      {status.error && <div className="alert">{status.error}</div>}
-      {status.loading ? (
-        <div className="loading">Loading slide...</div>
-      ) : (
-        <div className="admin-grid">
-          <form className="panel admin-form admin-animate" onSubmit={handleSubmit}>
-            <label className="admin-field">
-              <span>Title *</span>
-              <input className="input" value={form.title} onChange={updateField("title")} required />
-            </label>
-            <label className="admin-field">
-              <span>Subtitle</span>
-              <input className="input" value={form.subtitle} onChange={updateField("subtitle")} />
-            </label>
-            <div className="admin-form-grid">
-              <label className="admin-field">
-                <span>Badge</span>
-                <input className="input" value={form.badge} onChange={updateField("badge")} />
-              </label>
-              <label className="admin-field">
-                <span>Caption</span>
-                <input className="input" value={form.caption} onChange={updateField("caption")} />
-              </label>
-            </div>
-            <div className="admin-form-grid">
-              <label className="admin-field">
-                <span>Primary CTA Label</span>
-                <input className="input" value={form.cta1Label} onChange={updateField("cta1Label")} />
-              </label>
-              <label className="admin-field">
-                <span>Primary CTA Link</span>
-                <input className="input" value={form.cta1Href} onChange={updateField("cta1Href")} />
-              </label>
-            </div>
-            <div className="admin-form-grid">
-              <label className="admin-field">
-                <span>Secondary CTA Label</span>
-                <input className="input" value={form.cta2Label} onChange={updateField("cta2Label")} />
-              </label>
-              <label className="admin-field">
-                <span>Secondary CTA Link</span>
-                <input className="input" value={form.cta2Href} onChange={updateField("cta2Href")} />
-              </label>
-            </div>
-            <label className="admin-field">
-              <span>Tags</span>
-              <input className="input" value={form.tags} onChange={updateField("tags")} />
-            </label>
-
-            <div className="admin-form-grid">
-              <label className="admin-field">
-                <span>Image URL *</span>
-                <input className="input" value={form.image} onChange={updateField("image")} required />
-              </label>
-              <div className="admin-upload panel">
-                <div className="admin-section-header">
-                  <div>
-                    <h3>Upload image</h3>
-                    <p>Use an image from your bucket.</p>
-                  </div>
-                  <button
-                    className="btn btn-outline"
-                    type="button"
-                    onClick={() => fileInputRef.current?.click()}
-                    disabled={status.uploading}
-                  >
-                    {status.uploading ? "Uploading..." : "Choose file"}
-                  </button>
-                </div>
-                <input
-                  ref={fileInputRef}
-                  className="admin-file-input"
-                  type="file"
-                  accept="image/*"
-                  onChange={handleFileChange}
-                />
-              </div>
-            </div>
-
-            <div className="admin-form-grid">
-              <label className="admin-field admin-toggle">
-                <input type="checkbox" checked={form.active} onChange={updateField("active")} />
-                <span>Active</span>
-              </label>
-              <label className="admin-field">
-                <span>Sort order</span>
-                <input
-                  className="input"
-                  type="number"
-                  value={form.sortOrder}
-                  onChange={updateField("sortOrder")}
-                />
-              </label>
-            </div>
-
-            <button className="btn btn-primary" type="submit" disabled={status.saving}>
-              {status.saving ? "Saving..." : "Save slide"}
-            </button>
-          </form>
-
-          <div className="panel admin-animate">
-            <div className="admin-section-header">
-              <div>
-                <h2>Preview</h2>
-                <p>How the slide will look.</p>
-              </div>
-            </div>
-            <div className="admin-hero-preview">
-              {form.image ? <img src={form.image} alt="Hero preview" /> : <span>No image yet</span>}
-              <div className="admin-hero-overlay">
-                {form.badge && <span className="admin-hero-badge">{form.badge}</span>}
-                <h3>{form.title || "Slide title"}</h3>
-                <p>{form.subtitle || "Subtitle"}</p>
-              </div>
-            </div>
+    <div className="page-stack admin-animate">
+      <section className="section-header border-b border-slate-100 pb-8 mb-4">
+        <div className="flex items-center gap-4">
+          <Link to="/admin/hero" className="p-3 bg-white border border-slate-200 rounded-2xl text-slate-400 hover:text-indigo-600 hover:border-indigo-100 transition-all shadow-sm">
+            <ArrowLeft size={20} />
+          </Link>
+          <div>
+            <h1 className="text-3xl font-black tracking-tight text-slate-900">{isEdit ? "Edit Narrative" : "New Hero Story"}</h1>
+            <p className="text-slate-500 mt-1">{isEdit ? `Modifying slide #${id.slice(-4)}` : "Design a new flagship carousel entry."}</p>
           </div>
         </div>
-      )}
+        
+        <div className="flex items-center gap-4">
+           {status.success && (
+             <div className="flex items-center gap-2 text-emerald-600 font-black text-xs uppercase tracking-widest">
+               <CheckCircle2 size={16} />
+               <span>{status.success}</span>
+             </div>
+           )}
+           <button 
+             className="btn btn-primary px-8 py-3.5 rounded-2xl shadow-xl shadow-indigo-100 font-black text-sm" 
+             onClick={handleSubmit}
+             disabled={status.saving}
+           >
+             {status.saving ? (
+               <div className="h-5 w-5 border-2 border-white/50 border-t-white rounded-full animate-spin"></div>
+             ) : (
+               <div className="flex items-center gap-2">
+                 <Save size={18} />
+                 <span>{isEdit ? "Commit Slide" : "Publish Slide"}</span>
+               </div>
+             )}
+           </button>
+        </div>
+      </section>
+
+      {status.error && <div className="alert bg-red-50 text-red-600 p-4 rounded-2xl border border-red-100 mb-6 font-bold text-sm">{status.error}</div>}
+
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
+        {/* Left Column: Content Strategy */}
+        <div className="lg:col-span-7 space-y-10">
+          <section className="bg-white border border-slate-200 rounded-[2.5rem] p-8 shadow-sm">
+            <div className="flex items-center gap-3 mb-8">
+               <div className="h-10 w-10 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center">
+                 <Type size={18} strokeWidth={2.5} />
+               </div>
+               <h2 className="text-xl font-black text-slate-800 tracking-tight">Messaging</h2>
+            </div>
+            
+            <div className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 px-1">Prominent Badge</label>
+                  <input className="w-full px-6 py-3.5 rounded-2xl border border-slate-200 focus:outline-none focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all font-bold text-slate-800" placeholder="e.g., NEW ARRIVAL" value={form.badge} onChange={updateField("badge")} />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 px-1">Visual Caption</label>
+                  <input className="w-full px-6 py-3.5 rounded-2xl border border-slate-200 focus:outline-none focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all font-bold text-slate-800" placeholder="e.g., Summer Collection 2026" value={form.caption} onChange={updateField("caption")} />
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 px-1">Primary Title</label>
+                <input className="w-full px-6 py-4 rounded-2xl border border-slate-200 focus:outline-none focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all font-black text-xl text-slate-900" placeholder="Define your headline..." value={form.title} onChange={updateField("title")} required />
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 px-1">Contextual Subtitle</label>
+                <textarea rows={3} className="w-full px-6 py-4 rounded-2xl border border-slate-200 focus:outline-none focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all font-medium text-slate-600 resize-none" placeholder="Provide more detail about this feature..." value={form.subtitle} onChange={updateField("subtitle")} />
+              </div>
+
+              <div className="pt-4 grid grid-cols-1 md:grid-cols-2 gap-8 border-t border-slate-50">
+                 <div className="space-y-4">
+                    <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-indigo-500">
+                      <MousePointer2 size={12} />
+                      <span>Primary Action (CTA)</span>
+                    </div>
+                    <input className="w-full px-4 py-3 rounded-xl border border-slate-100 bg-slate-50/50 focus:bg-white focus:outline-none focus:border-indigo-300 transition-all font-bold text-sm" placeholder="Button Label" value={form.cta1Label} onChange={updateField("cta1Label")} />
+                    <input className="w-full px-4 py-3 rounded-xl border border-slate-100 bg-slate-50/50 focus:bg-white focus:outline-none focus:border-indigo-300 transition-all font-mono text-[11px] text-slate-400" placeholder="Link (e.g., /shop)" value={form.cta1Href} onChange={updateField("cta1Href")} />
+                 </div>
+                 <div className="space-y-4 opacity-70 hover:opacity-100 transition-opacity">
+                    <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-slate-400">
+                      <LinkIcon size={12} />
+                      <span>Secondary Action</span>
+                    </div>
+                    <input className="w-full px-4 py-3 rounded-xl border border-slate-100 bg-slate-50/50 focus:bg-white focus:outline-none focus:border-slate-300 transition-all font-bold text-sm" placeholder="Label" value={form.cta2Label} onChange={updateField("cta2Label")} />
+                    <input className="w-full px-4 py-3 rounded-xl border border-slate-100 bg-slate-50/50 focus:bg-white focus:outline-none focus:border-slate-300 transition-all font-mono text-[11px] text-slate-400" placeholder="Link" value={form.cta2Href} onChange={updateField("cta1Href")} />
+                 </div>
+              </div>
+            </div>
+          </section>
+
+          <section className="bg-slate-900 border border-slate-800 rounded-[2.5rem] p-8 shadow-2xl">
+             <div className="flex items-center gap-3 mb-8">
+               <div className="h-10 w-10 rounded-2xl bg-white/10 text-white flex items-center justify-center">
+                 <Settings2 size={18} strokeWidth={2.5} />
+               </div>
+               <h2 className="text-xl font-black text-white tracking-tight">Configuration</h2>
+             </div>
+
+             <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+                <div className="space-y-4">
+                  <label className="text-[10px] font-black uppercase tracking-[0.2em] text-indigo-400 px-1">Display Priority</label>
+                  <input 
+                    type="number"
+                    className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-white font-black text-lg outline-none focus:border-indigo-500 transition-all"
+                    value={form.sortOrder}
+                    onChange={updateField("sortOrder")}
+                  />
+                  <p className="text-[10px] text-slate-500 font-bold px-1">Lowest values appear first in the carousel.</p>
+                </div>
+                
+                <div className="flex items-center">
+                  <label className="flex items-center gap-4 cursor-pointer group w-full p-6 rounded-3xl bg-white/5 border border-white/5 hover:border-white/20 transition-all">
+                    <div className={`h-8 w-14 rounded-full relative transition-all duration-500 shadow-inner ${form.active ? "bg-indigo-600" : "bg-white/10"}`}>
+                      <div className={`h-5 w-5 rounded-full bg-white absolute top-1.5 transition-all duration-500 shadow-lg ${form.active ? "left-7" : "left-2"}`}></div>
+                    </div>
+                    <div>
+                      <span className="block text-sm font-black text-white group-hover:text-indigo-300 transition-colors uppercase tracking-widest">Visibility status</span>
+                      <span className="text-[10px] text-white/40 font-bold uppercase tracking-tighter">{form.active ? "Currently Live" : "Draft (Hidden)"}</span>
+                    </div>
+                    <input type="checkbox" className="hidden" checked={form.active} onChange={updateField("active")} />
+                  </label>
+                </div>
+             </div>
+          </section>
+        </div>
+
+        {/* Right Column: Visual Strategy & Preview */}
+        <div className="lg:col-span-5 space-y-10">
+          <section className="bg-white border border-slate-200 rounded-[2.5rem] p-8 shadow-sm">
+            <div className="flex items-center justify-between mb-8">
+               <div className="flex items-center gap-3">
+                 <div className="h-10 w-10 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center">
+                   <ImageIcon size={18} strokeWidth={2.5} />
+                 </div>
+                 <h2 className="text-xl font-black text-slate-800 tracking-tight">Visual Asset</h2>
+               </div>
+               
+               <button 
+                 type="button" 
+                 onClick={() => fileInputRef.current?.click()}
+                 disabled={status.uploading}
+                 className="p-3 bg-slate-50 border border-slate-100 rounded-2xl text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 hover:border-indigo-100 transition-all"
+               >
+                 {status.uploading ? (
+                   <div className="h-5 w-5 border-2 border-indigo-600/30 border-t-indigo-600 rounded-full animate-spin"></div>
+                 ) : (
+                   <Upload size={20} />
+                 )}
+               </button>
+               <input ref={fileInputRef} type="file" className="hidden" onChange={handleFileChange} />
+            </div>
+
+            <div className="space-y-2 mb-6">
+              <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 px-1">Resource URL</label>
+              <input className="w-full px-5 py-4 rounded-2xl border border-slate-200 focus:outline-none focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all font-mono text-[11px] text-slate-500" placeholder="https://..." value={form.image} onChange={updateField("image")} required />
+            </div>
+
+            <div className="space-y-4">
+               <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 px-1 flex items-center gap-2">
+                 <Eye size={12} strokeWidth={3} />
+                 <span>High-Fidelity Preview</span>
+               </label>
+               
+               <div className="relative aspect-[16/10] rounded-[2rem] bg-slate-100 border border-slate-200 overflow-hidden group shadow-inner">
+                  {form.image ? (
+                    <img src={form.image} alt="" className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105" />
+                  ) : (
+                    <div className="w-full h-full flex flex-col items-center justify-center text-slate-300">
+                        <ImageIcon size={48} strokeWidth={1} className="mb-2 opacity-20" />
+                        <p className="text-[10px] font-extrabold uppercase tracking-widest">Awaiting Visual</p>
+                    </div>
+                  )}
+                  
+                  {/* Real-time Overlay Simulation */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent p-6 flex flex-col justify-end">
+                     <div className="space-y-1.5 transform translate-y-2 group-hover:translate-y-0 transition-transform duration-500">
+                        {form.badge && (
+                          <span className="inline-block px-2.5 py-1 bg-white/20 backdrop-blur-md rounded-lg text-[9px] font-black text-white uppercase tracking-widest border border-white/20 whitespace-nowrap mb-1">
+                             {form.badge}
+                          </span>
+                        )}
+                        <h4 className="text-lg font-black text-white leading-tight drop-shadow-lg">{form.title || "Headline Visualized"}</h4>
+                        <p className="text-xs text-white/70 font-bold line-clamp-2 leading-relaxed drop-shadow-md">{form.subtitle || "Supporting narrative text appears here..."}</p>
+                        
+                        <div className="flex gap-2 pt-3">
+                           {form.cta1Label && <div className="px-3 py-1.5 bg-white rounded-lg text-[8px] font-black text-black uppercase tracking-widest">{form.cta1Label}</div>}
+                           {form.cta2Label && <div className="px-3 py-1.5 bg-white/20 backdrop-blur-md rounded-lg text-[8px] font-black text-white uppercase tracking-widest border border-white/20">{form.cta2Label}</div>}
+                        </div>
+                     </div>
+                  </div>
+                  
+                  <div className="absolute top-4 right-4 h-8 w-8 bg-black/40 backdrop-blur-md rounded-xl flex items-center justify-center text-white/40">
+                    <Monitor size={14} />
+                  </div>
+               </div>
+               
+               <p className="text-[10px] text-slate-400 font-medium leading-relaxed px-1">
+                 This preview simulates the homepage hero slider. Text colors and alignment are adjusted automatically based on container logic.
+               </p>
+            </div>
+          </section>
+
+          <section className="bg-gradient-to-br from-slate-800 to-slate-950 rounded-[2.5rem] p-8 text-white shadow-xl">
+             <div className="flex items-center gap-3 mb-6">
+                <Sparkles size={20} className="text-indigo-400" />
+                <h3 className="text-lg font-black tracking-tight">Curation Strategy</h3>
+             </div>
+             <ul className="space-y-4">
+                {[
+                  "Use aspect ratios optimized for mobile and desktop.",
+                  "Headlines should be punchy (3-6 words maximum).",
+                  "Call-to-actions should create a sense of urgency.",
+                  "High contrast backgrounds improve readability."
+                ].map((tip, i) => (
+                  <li key={i} className="flex gap-3 text-xs font-bold text-slate-400 leading-relaxed">
+                    <div className="h-1.5 w-1.5 rounded-full bg-indigo-500 mt-1.5 flex-shrink-0"></div>
+                    <span>{tip}</span>
+                  </li>
+                ))}
+             </ul>
+          </section>
+        </div>
+      </div>
     </div>
   );
 }

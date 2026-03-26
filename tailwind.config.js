@@ -11,14 +11,14 @@ export default {
         sans: ["Space Grotesk", "Inter", "system-ui", "sans-serif"]
       },
       colors: {
-        ink: "#0f172a",
-        accent: "#f06c4b",
-        paper: "#f8fafc"
+        ink: "#050505",
+        accent: "#171717",
+        paper: "#ffffff"
       },
       boxShadow: {
-        card: "0 20px 60px -35px rgba(15, 23, 42, 0.35)",
-        ring: "0 10px 30px -18px rgba(15, 23, 42, 0.55)",
-        glass: "0 18px 50px -30px rgba(15, 23, 42, 0.6)"
+        card: "0 20px 60px -35px rgba(5, 5, 5, 0.15)",
+        ring: "0 10px 30px -18px rgba(5, 5, 5, 0.25)",
+        glass: "0 18px 50px -30px rgba(5, 5, 5, 0.3)"
       },
       borderRadius: {
         xl: "1rem",

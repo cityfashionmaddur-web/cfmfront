@@ -4,10 +4,10 @@ import { apiGet } from "../utils/api.js";
 import { formatPrice } from "../utils/format.js";
 import { useCart } from "../context/CartContext.jsx";
 import ProductCard from "../components/ProductCard.jsx";
-// You can use lucide-react or heroicons. Using SVG directly here for zero-dep.
-const ChevronDown = () => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m6 9 6 6 6-6"/></svg>;
-const Minus = () => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14"/></svg>;
-const Plus = () => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>;
+
+const ChevronDown = () => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="square" strokeLinejoin="miter"><path d="m6 9 6 6 6-6"/></svg>;
+const Minus = () => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="square" strokeLinejoin="miter"><path d="M5 12h14"/></svg>;
+const Plus = () => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="square" strokeLinejoin="miter"><path d="M5 12h14"/><path d="M12 5v14"/></svg>;
 
 export default function ProductDetail() {
   const { slug } = useParams();
@@ -18,7 +18,6 @@ export default function ProductDetail() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  // State for accordions
   const [openSection, setOpenSection] = useState("details");
   const [selectedSize, setSelectedSize] = useState("");
 
@@ -89,118 +88,90 @@ export default function ProductDetail() {
   if (!product) return null;
 
   return (
-    <div className="min-h-screen bg-white text-slate-900 pb-16 pt-12 lg:pb-0">
+    <div className="min-h-screen bg-white text-ink pb-24 pt-16 lg:pb-32">
 
-      {/* Breadcrumbs - Minimalist */}
-      <div className="container mx-auto px-4 py-6">
-        <nav className="flex items-center text-xs font-medium uppercase tracking-widest text-slate-400">
-          <Link to="/" className="hover:text-slate-900 transition-colors">Home</Link>
-          <span className="mx-2">/</span>
+      {/* Breakpoint Container Navbar -> Content offset */}
+      <div className="container mx-auto px-6 lg:px-12 py-6">
+        <nav className="flex items-center text-[9px] font-black uppercase tracking-[0.2em] text-gray-400">
+          <Link to="/" className="hover:text-ink transition-colors">Home</Link>
+          <span className="mx-3">/</span>
           {product.category?.slug ? (
-            <Link to={`/categories/${product.category.slug}`} className="hover:text-slate-900 transition-colors">
+            <Link to={`/categories/${product.category.slug}`} className="hover:text-ink transition-colors">
               {product.category.name}
             </Link>
           ) : <span>Products</span>}
+          <span className="mx-3">/</span>
+          <span className="text-ink truncate">{product.title}</span>
         </nav>
       </div>
 
-      <main className="container mx-auto px-4 lg:px-4">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12 xl:gap-16">
+      <main className="container mx-auto px-6 lg:px-12">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 xl:gap-24">
 
-          {/* LEFT: Image Gallery (Stacked on Desktop, Carousel on Mobile) */}
-          <div className="lg:col-span-7 xl:col-span-8 order-1 lg:order-1">
-            {/* Desktop Grid Layout */}
+          {/* LEFT: Image Gallery */}
+          <div className="lg:col-span-7 xl:col-span-8 order-1">
             <div className="hidden lg:grid grid-cols-2 gap-4">
               {images.length > 0 ? (
                 images.map((url, idx) => (
-                  <div key={idx} className={`relative overflow-hidden bg-slate-50 ${idx === 0 && images.length % 2 !== 0 ? 'col-span-2' : ''}`}>
+                  <div key={idx} className={`relative overflow-hidden bg-gray-50 aspect-[3/4] ${idx === 0 && images.length % 2 !== 0 ? 'col-span-2 aspect-[4/5]' : ''}`}>
                     <img
                       src={url}
                       alt={`${product.title} view ${idx + 1}`}
-                      className="w-full h-auto object-cover hover:scale-105 transition-transform duration-700 ease-out"
+                      className="w-full h-full object-cover hover:scale-105 transition-transform duration-[1.5s] ease-[0.16,1,0.3,1]"
                     />
                   </div>
                 ))
               ) : (
-                <div className="col-span-2 h-[600px] bg-slate-100 flex items-center justify-center text-slate-300">
-                  No Images Available
+                <div className="col-span-2 h-[80vh] bg-gray-50 flex items-center justify-center text-[10px] uppercase tracking-widest text-gray-400 font-bold">
+                  No Archive Imagery
                 </div>
               )}
             </div>
 
-            {/* Mobile Swipe Layout */}
-            <div className="relative lg:hidden">
-              <div className="flex overflow-x-auto snap-x snap-mandatory scrollbar-hide gap-1">
+            <div className="relative lg:hidden -mx-6 px-6">
+              <div className="flex overflow-x-auto snap-x snap-mandatory scrollbar-hide gap-4 pb-8">
                 {images.length > 0 ? (
                   images.map((url, idx) => (
-                    <div key={idx} className="snap-center min-w-[100vw] sm:min-w-[80vw] h-[50vh] bg-slate-50">
+                    <div key={idx} className="snap-center min-w-[85vw] aspect-[3/4] bg-gray-50 relative">
                       <img src={url} alt="" className="w-full h-full object-cover" />
+                      <div className="absolute bottom-4 left-4 bg-white/90 px-3 py-1 text-[9px] font-black uppercase tracking-widest text-ink">
+                        {String(idx + 1).padStart(2, '0')} / {String(images.length).padStart(2, '0')}
+                      </div>
                     </div>
                   ))
                 ) : (
-                  <div className="w-full h-[50vh] bg-slate-100" />
+                  <div className="w-full aspect-[3/4] bg-gray-50" />
                 )}
               </div>
-              {images.length > 1 && (
-                <div className="pointer-events-none absolute inset-0 flex items-center justify-between px-3">
-                  <button
-                    type="button"
-                    onClick={(e) => { e.stopPropagation(); prevImage(); }}
-                    className="pointer-events-auto rounded-full bg-white/80 p-2 text-slate-900 shadow"
-                    aria-label="Previous image"
-                  >
-                    ‹
-                  </button>
-                  <button
-                    type="button"
-                    onClick={(e) => { e.stopPropagation(); nextImage(); }}
-                    className="pointer-events-auto rounded-full bg-white/80 p-2 text-slate-900 shadow"
-                    aria-label="Next image"
-                  >
-                    ›
-                  </button>
-                </div>
-              )}
             </div>
           </div>
 
-          {/* RIGHT: Product Info (Sticky Sidebar) */}
-          <div className="lg:col-span-5 xl:col-span-4 order-2 lg:order-2 px-0 lg:px-0 mt-6 lg:mt-0">
-            <div className="card-surface sticky top-8 space-y-8 p-6 shadow-2xl">
+          {/* RIGHT: Product Info */}
+          <div className="lg:col-span-5 xl:col-span-4 order-2 lg:mt-0 relative">
+            <div className="sticky top-24 space-y-10">
 
-              {/* Header Info */}
               <div className="space-y-4">
-                <div className="flex justify-between items-start">
-                  <h1 className="heading-xl font-light tracking-tight text-slate-900">
-                    {product.title}
-                  </h1>
-                  {product.rating && (
-                    <span className="hidden lg:flex items-center gap-1 text-sm font-medium">
-                      ★ {Number(product.rating).toFixed(1)}
-                    </span>
-                  )}
-                </div>
-                <div className="text-xl lg:text-2xl font-medium text-slate-900">
+                <h1 className="text-3xl lg:text-5xl font-heading font-black uppercase tracking-tighter text-ink leading-none">
+                  {product.title}
+                </h1>
+                <div className="text-xl font-medium text-ink">
                   {formatPrice(product.price)}
                 </div>
               </div>
 
-              {/* Description */}
-              <p className="text-slate-600 leading-relaxed font-light">
-                {product.description || "Designed for modern living, this piece combines utility with understated elegance."}
+              <p className="text-sm text-gray-500 leading-relaxed max-w-md">
+                {product.description || "A curated piece blending stark minimalism with functional utility. Perfect for transitioning seasons."}
               </p>
 
-              {/* Action Area */}
-              <div className="pt-4 border-t border-slate-100 space-y-6">
-
-                {/* Size Selector */}
+              <div className="pt-6 border-t border-gray-100 space-y-8">
+                
                 {hasVariants && (
                   <div className="space-y-4">
                     <div className="flex justify-between items-center">
-                      <span className="text-sm font-medium text-slate-900">Select Size</span>
-                      <button className="text-xs text-slate-500 underline font-medium hover:text-slate-900 transition-colors">Size Guide</button>
+                      <span className="text-[10px] font-black uppercase tracking-widest text-ink">Select Dimension</span>
+                      <button className="text-[10px] font-bold uppercase tracking-widest text-gray-400 hover:text-ink transition-colors border-b border-gray-400 hover:border-ink">Fit Guide</button>
                     </div>
-                    <div className="flex flex-wrap gap-2 sm:gap-3">
+                    <div className="flex flex-wrap gap-3">
                       {product.variants.map((v) => {
                          const isSelected = selectedSize === v.size;
                          const isOutOfStock = v.stock === 0;
@@ -209,12 +180,12 @@ export default function ProductDetail() {
                              key={v.size}
                              onClick={() => !isOutOfStock && setSelectedSize(v.size)}
                              disabled={isOutOfStock}
-                             className={`min-w-[3rem] sm:min-w-[3.5rem] h-12 px-4 border text-sm font-semibold transition-all duration-200 ${
+                             className={`min-w-[3.5rem] h-12 border text-xs font-bold uppercase tracking-widest transition-all duration-200 ${
                                isSelected
-                                 ? 'border-slate-900 bg-slate-900 text-white shadow-md transform -translate-y-0.5'
+                                 ? 'border-ink bg-ink text-white shadow-xl'
                                  : isOutOfStock
-                                 ? 'border-slate-100 bg-slate-50 text-slate-300 cursor-not-allowed line-through'
-                                 : 'border-slate-200 bg-white text-slate-700 hover:border-slate-900 hover:text-slate-900 shadow-sm hover:shadow'
+                                 ? 'border-gray-100 bg-gray-50 text-gray-300 cursor-not-allowed line-through'
+                                 : 'border-gray-200 bg-transparent text-ink hover:border-ink'
                              }`}
                            >
                              {v.size}
@@ -225,89 +196,71 @@ export default function ProductDetail() {
                   </div>
                 )}
 
-                {/* Quantity & Stock Status */}
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 py-2">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 py-2">
                   <div className="flex items-center gap-4">
-                    <span className="text-sm font-medium text-slate-900">Quantity</span>
-                    <div className="flex items-center border border-slate-200 rounded-full px-2 py-1 bg-white shadow-sm">
+                    <span className="text-[10px] font-black uppercase tracking-widest text-ink">Quantity</span>
+                    <div className="flex items-center border border-gray-200 h-12">
                       <button
                         onClick={() => setQuantity(q => Math.max(1, q - 1))}
-                        className="p-2 text-slate-500 hover:text-slate-900 transition-colors"
+                        className="px-4 text-ink hover:bg-gray-50 h-full flex items-center transition-colors"
                       >
                         <Minus />
                       </button>
-                      <span className="w-8 text-center text-sm font-medium">{quantity}</span>
+                      <span className="w-8 text-center text-xs font-bold">{quantity}</span>
                       <button
                          onClick={() => setQuantity(q => Math.min(getStockCount() || 99, q + 1))}
-                         className="p-2 text-slate-500 hover:text-slate-900 transition-colors"
+                         className="px-4 text-ink hover:bg-gray-50 h-full flex items-center transition-colors"
                       >
                         <Plus />
                       </button>
                     </div>
                   </div>
-                  <div className={`text-xs font-semibold uppercase tracking-[0.1em] px-3 py-1.5 rounded-full inline-flex md:bg-opacity-10 ${
-                    inStock 
-                      ? 'bg-emerald-50 text-emerald-700' 
-                      : 'bg-rose-50 text-rose-700'
+                  <div className={`text-[9px] font-black uppercase tracking-[0.2em] px-4 py-2 flex items-center gap-2 ${
+                    inStock ? 'text-green-600 bg-green-50' : 'text-red-500 bg-red-50'
                   }`}>
-                     {inStock ? (getStockCount() <= 5 ? `Only ${getStockCount()} left` : 'In Stock') : 'Sold Out'}
+                     <span className={`w-1.5 h-1.5 rounded-full ${inStock ? 'bg-green-600' : 'bg-red-500'}`} />
+                     {inStock ? (getStockCount() <= 5 ? `Limited: ${getStockCount()} Remaining` : 'Available') : 'Archived'}
                   </div>
                 </div>
 
-                {/* Desktop Add to Cart */}
                 <button
                   onClick={handleAdd}
                   disabled={!inStock}
-                  className="hidden lg:block w-full btn-primary h-14 text-center disabled:bg-slate-200 disabled:text-slate-400 disabled:cursor-not-allowed"
+                  className="w-full btn-primary h-14"
                 >
-                  {inStock ? `Add to Cart - ${formatPrice(product.price * quantity)}` : 'Notify Me'}
+                  {inStock ? `Acquire Piece — ${formatPrice(product.price * quantity)}` : 'Out of Stock'}
                 </button>
-
-                {/* Mobile Fixed Bottom Bar */}
-                <div className="fixed bottom-0 left-0 right-0 p-4 bg-white/95 border-t border-slate-100 lg:hidden z-50 flex items-center gap-4">
-                  <div className="flex-1">
-                    <p className="text-xs text-slate-500 uppercase tracking-wider">{product.title}</p>
-                    <p className="font-medium">{formatPrice(product.price)}</p>
-                  </div>
-                  <button
-                     onClick={handleAdd}
-                     disabled={!inStock}
-                     className="flex-1 btn-primary h-12 text-center disabled:bg-slate-200 disabled:text-slate-400"
-                  >
-                    Add to Cart
-                  </button>
-                </div>
               </div>
 
-              {/* Information Accordions */}
-            <div className="divide-y divide-slate-100 border-t border-b border-slate-100 mt-2">
+              {/* Minimal Accordions */}
+              <div className="border-t border-b border-gray-100 divide-y divide-gray-100 mt-12">
                 <AccordionItem
-                  title="Details & Fit"
+                  title="Design & Construction"
                   isOpen={openSection === 'details'}
                   onClick={() => toggleSection('details')}
                 >
-                  <ul className="list-disc pl-5 space-y-1 text-slate-600 font-light">
-                    <li>Premium fabric blend for all-day wear.</li>
-                    <li>Tailored fit inspired by modern luxury labels.</li>
-                    <li>Model is 6'1" and wears size M.</li>
+                  <ul className="space-y-2 text-sm text-gray-500 list-disc pl-4 font-medium">
+                    <li>Engineered with premium transitional fabrics.</li>
+                    <li>Oversized, boxy fit with dropped shoulders.</li>
+                    <li>Matte finish hardware and reinforced stitching.</li>
                   </ul>
                 </AccordionItem>
                 <AccordionItem
-                  title="Delivery & Returns"
+                  title="Shipping & Returns"
                   isOpen={openSection === 'delivery'}
                   onClick={() => toggleSection('delivery')}
                 >
-                  <p className="text-slate-600 font-light">
-                    Free standard shipping on orders over $100. Returns accepted within 30 days of delivery.
+                  <p className="text-sm text-gray-500 font-medium">
+                    Complimentary express shipping on orders over $250. Returns are accepted within 14 days of receipt, provided the tags remain attached.
                   </p>
                 </AccordionItem>
                 <AccordionItem
-                  title="Care Instructions"
+                  title="Care Guide"
                   isOpen={openSection === 'care'}
                   onClick={() => toggleSection('care')}
                 >
-                  <p className="text-slate-600 font-light">
-                    Machine wash cold with like colors. Tumble dry low. Do not bleach.
+                  <p className="text-sm text-gray-500 font-medium">
+                    Dry clean strictly recommended. To maintain structure, avoid hanging on wire hangers. Do not iron directly on fabric.
                   </p>
                 </AccordionItem>
               </div>
@@ -317,28 +270,28 @@ export default function ProductDetail() {
         </div>
       </main>
 
-      {/* Related Products Section - Cleaned up duplication */}
+      {/* Editor's Picks */}
       {related.length > 0 && (
-        <section className="container mx-auto px-4 py-24 border-t border-slate-100 mt-24">
-          <div className="flex items-end justify-between mb-8">
+        <section className="container mx-auto px-6 lg:px-12 pt-32 mt-16 border-t border-gray-200">
+          <div className="flex items-end justify-between mb-12">
             <div>
-              <h2 className="text-2xl font-light text-slate-900">Curated for you</h2>
-              <p className="text-slate-500 mt-1 font-light">Pieces you might also appreciate.</p>
+              <h2 className="text-3xl font-heading font-black uppercase tracking-tighter text-ink">Curated Archive</h2>
+              <p className="text-gray-400 mt-2 text-[10px] font-bold uppercase tracking-widest">Aesthetic Companions</p>
             </div>
-            <Link to="/products" className="hidden md:block text-sm font-medium border-b border-slate-900 pb-0.5 hover:opacity-70 transition-opacity">
-              View All
+            <Link to="/products" className="hidden md:inline-block text-[10px] font-bold uppercase tracking-[0.2em] text-ink border-b border-ink pb-1 hover:text-gray-500 hover:border-gray-500 transition-colors">
+              Explore Catalog
             </Link>
           </div>
 
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-6 gap-y-10">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-4 md:gap-x-8 gap-y-12">
             {related.slice(0, 4).map((item) => (
               <ProductCard key={item.id} product={item} />
             ))}
           </div>
 
-          <div className="mt-8 text-center md:hidden">
-             <Link to="/products" className="btn-outline inline-flex justify-center">
-               View All Products
+          <div className="mt-16 text-center md:hidden">
+             <Link to="/products" className="btn-secondary w-full">
+               All Products
              </Link>
           </div>
         </section>
@@ -347,23 +300,22 @@ export default function ProductDetail() {
   );
 }
 
-// Sub-components for cleaner code
 function AccordionItem({ title, isOpen, onClick, children }) {
   return (
-    <div className="py-4">
+    <div className="py-5">
       <button
         onClick={onClick}
-        className="flex w-full items-center justify-between text-left text-sm font-medium uppercase tracking-wider text-slate-900 hover:text-slate-600 transition-colors"
+        className="flex w-full items-center justify-between text-left text-[11px] font-black uppercase tracking-widest text-ink hover:text-gray-500 transition-colors"
       >
         <span>{title}</span>
-        <span className={`transform transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`}>
+        <span className={`transform transition-transform duration-500 ease-[0.16,1,0.3,1] ${isOpen ? '-rotate-180' : ''}`}>
           <ChevronDown />
         </span>
       </button>
       <div
-        className={`overflow-hidden transition-all duration-300 ease-in-out ${isOpen ? 'max-h-48 opacity-100 mt-4' : 'max-h-0 opacity-0'}`}
+        className={`overflow-hidden transition-all duration-500 ease-[0.16,1,0.3,1] ${isOpen ? 'max-h-48 opacity-100 mt-4' : 'max-h-0 opacity-0'}`}
       >
-        <div className="text-sm pb-2">
+        <div className="pb-2">
           {children}
         </div>
       </div>
@@ -373,15 +325,15 @@ function AccordionItem({ title, isOpen, onClick, children }) {
 
 function ProductSkeleton() {
   return (
-    <div className="container mx-auto px-4 py-8 grid lg:grid-cols-12 gap-12">
+    <div className="container mx-auto px-6 py-16 grid lg:grid-cols-12 gap-12">
       <div className="lg:col-span-8 space-y-4">
-        <div className="bg-slate-100 h-[60vh] w-full animate-pulse rounded-md"></div>
+        <div className="bg-gray-100 h-[80vh] w-full animate-pulse" />
       </div>
-      <div className="lg:col-span-4 space-y-6 mt-8 lg:mt-0">
-        <div className="h-8 bg-slate-100 w-3/4 animate-pulse rounded"></div>
-        <div className="h-6 bg-slate-100 w-1/4 animate-pulse rounded"></div>
-        <div className="h-24 bg-slate-100 w-full animate-pulse rounded"></div>
-        <div className="h-12 bg-slate-100 w-full animate-pulse rounded-full mt-8"></div>
+      <div className="lg:col-span-4 space-y-8 mt-12 lg:mt-0">
+        <div className="h-12 bg-gray-100 w-3/4 animate-pulse" />
+        <div className="h-8 bg-gray-100 w-1/4 animate-pulse" />
+        <div className="h-24 bg-gray-100 w-full animate-pulse mt-8" />
+        <div className="h-14 bg-gray-100 w-full animate-pulse mt-12" />
       </div>
     </div>
   );
@@ -389,10 +341,10 @@ function ProductSkeleton() {
 
 function ErrorMessage({ message }) {
   return (
-    <div className="min-h-[50vh] flex items-center justify-center">
-      <div className="bg-rose-50 text-rose-600 px-6 py-4 rounded-lg border border-rose-100">
-        <p className="font-medium">Something went wrong</p>
-        <p className="text-sm mt-1">{message}</p>
+    <div className="min-h-[70vh] flex flex-col items-center justify-center p-6">
+      <div className="border border-red-200 bg-red-50 text-red-600 px-8 py-6 text-center max-w-md">
+        <p className="text-[10px] font-black uppercase tracking-widest mb-2">Error</p>
+        <p className="text-sm font-medium">{message}</p>
       </div>
     </div>
   );

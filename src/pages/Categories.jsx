@@ -31,69 +31,69 @@ export default function Categories() {
   }, []);
 
   return (
-    <div className="flex flex-col gap-8 pt-12">
-      <section className="rounded-3xl border border-slate-200 bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 p-6 text-white shadow-md">
-        <div className="flex flex-wrap items-center justify-between gap-4">
-          <div className="space-y-2">
-            <p className="text-[11px] uppercase tracking-[0.3em] text-white/60">Explore</p>
-            <h1 className="text-3xl font-semibold">Shop by category</h1>
-            <p className="text-sm text-white/75">Navigate curated collections and seasonal edits for every wardrobe.</p>
-          </div>
-          <Link
-            to="/products"
-            className="rounded-full bg-white px-4 py-2 text-sm font-semibold text-slate-900 shadow-sm transition hover:-translate-y-0.5 hover:shadow-lg"
-          >
-            View all products
-          </Link>
-        </div>
-      </section>
+    <div className="container mx-auto px-6 lg:px-12 py-16 lg:py-24 space-y-16">
+      
+      <div className="border border-gray-200 p-8 md:p-12 lg:p-16 bg-gray-50/30 text-center">
+        <p className="text-[10px] uppercase font-black tracking-[0.3em] text-gray-500 mb-6">Explore Curations</p>
+        <h1 className="text-4xl md:text-5xl lg:text-6xl font-heading font-black uppercase tracking-tighter text-ink mb-8 leading-none">
+          The Collections
+        </h1>
+        <p className="text-sm text-gray-500 max-w-lg mx-auto mb-10 font-medium">
+          Navigate highly curated capsules and seasonal edits. Form and function engineered for the daily rhythm.
+        </p>
+        <Link
+          to="/products"
+          className="btn-primary inline-flex items-center justify-center"
+        >
+          View The Archive
+        </Link>
+      </div>
 
       {error && (
-        <div className="rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
-          {error}
+        <div className="border border-red-200 bg-red-50 p-4 text-center">
+          <p className="text-[10px] font-bold uppercase tracking-widest text-red-600">{error}</p>
         </div>
       )}
+
       {loading ? (
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {[...Array(6)].map((_, idx) => (
-            <div key={idx} className="animate-pulse rounded-2xl border border-slate-200 bg-white/80 p-5 shadow">
-              <div className="mb-3 h-4 w-24 rounded bg-slate-200" />
-              <div className="mb-2 h-5 w-2/3 rounded bg-slate-200" />
-              <div className="h-3 w-full rounded bg-slate-200" />
-              <div className="mt-2 h-3 w-2/3 rounded bg-slate-200" />
+            <div key={idx} className="animate-pulse border border-gray-200 bg-gray-50/50 p-8 aspect-square flex flex-col justify-end">
+              <div className="mb-4 h-4 w-24 bg-gray-200" />
+              <div className="h-6 w-2/3 bg-gray-200" />
             </div>
           ))}
         </div>
       ) : (
-        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {categories.length ? (
             categories.map((category) => (
               <Link
                 key={category.id}
-                className="group rounded-2xl border border-slate-200 bg-white/90 p-5 shadow-lg transition hover:-translate-y-1 hover:shadow-xl"
+                className="group relative border border-gray-200 bg-white p-8 aspect-[4/3] flex flex-col justify-between hover:border-ink transition-colors overflow-hidden"
                 to={`/categories/${category.slug}`}
               >
-                <div className="flex items-center gap-3">
-                  <div className="grid h-10 w-10 place-items-center rounded-full bg-slate-100 text-sm font-semibold text-slate-900">
+                <div className="absolute inset-0 bg-gray-50/50 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
+                
+                <div className="flex items-start justify-between relative z-10">
+                  <div className="h-12 w-12 border border-gray-200 flex items-center justify-center text-lg font-heading font-black text-ink uppercase bg-white group-hover:bg-ink group-hover:text-white transition-colors">
                     {(category.name || "C").slice(0, 2).toUpperCase()}
                   </div>
-                  <div>
-                    <p className="text-[11px] uppercase tracking-[0.25em] text-slate-500">Category</p>
-                    <h3 className="text-xl font-semibold text-slate-900">{category.name}</h3>
-                  </div>
-                </div>
-                <p className="mt-3 text-sm text-slate-600 line-clamp-2">{category.description || "Curated pieces for this collection."}</p>
-                <div className="mt-4 flex items-center justify-between text-sm font-semibold text-slate-700">
-                  <span>{category._count?.products || 0} products</span>
-                  <span className="rounded-full bg-slate-100 px-3 py-1 text-xs text-slate-700 group-hover:bg-slate-900 group-hover:text-white transition">
-                    Browse
+                  <span className="text-[10px] font-black uppercase tracking-widest text-gray-400 group-hover:text-ink transition-colors">
+                    Explore →
                   </span>
+                </div>
+                
+                <div className="relative z-10">
+                  <p className="text-[10px] uppercase tracking-[0.2em] text-gray-500 mb-2 font-bold">{category._count?.products || 0} Pieces</p>
+                  <h3 className="text-2xl font-heading font-black uppercase tracking-tight text-ink mb-3">{category.name}</h3>
+                  <p className="text-xs text-gray-500 font-medium line-clamp-2 leading-relaxed">{category.description || "Curated precision and uncompromising aesthetic for this collection."}</p>
                 </div>
               </Link>
             ))
           ) : (
-            <div className="flex flex-col items-center gap-2 rounded-2xl border border-dashed border-slate-300 bg-white/70 p-10 text-center text-slate-500 shadow-inner">
-              No categories yet.
+            <div className="col-span-full py-32 flex flex-col items-center justify-center text-center border border-gray-200 bg-gray-50/30">
+              <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400">No curations available.</p>
             </div>
           )}
         </div>

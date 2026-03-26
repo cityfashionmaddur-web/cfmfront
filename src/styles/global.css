@@ -1,4 +1,4 @@
-@import url("https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;0,800;1,400;1,600&family=Space+Grotesk:wght@300;400;500;600;700&display=swap");
 
 @tailwind base;
 @tailwind components;
@@ -10,11 +10,8 @@
   }
 
   body {
-    @apply min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100 text-slate-900 antialiased;
-    background-image:
-      radial-gradient(circle at 20% 20%, rgba(59, 130, 246, 0.06), transparent 35%),
-      radial-gradient(circle at 80% 10%, rgba(244, 114, 182, 0.08), transparent 38%),
-      linear-gradient(135deg, #f8fafc 0%, #f5f5ff 50%, #eef2ff 100%);
+    @apply min-h-screen bg-white text-ink antialiased selection:bg-ink selection:text-white;
+    /* Clean, stark background for the Lookbook aesthetic */
   }
 
   h1,
@@ -27,27 +24,39 @@
   }
 
   :focus-visible {
-    @apply outline-none ring-2 ring-offset-2 ring-offset-white ring-slate-900/60;
+    @apply outline-none ring-2 ring-offset-2 ring-offset-white ring-ink/20;
   }
 
   .heading-xl {
-    @apply text-3xl font-semibold leading-tight sm:text-4xl;
+    @apply text-4xl font-semibold leading-tight sm:text-5xl md:text-6xl tracking-tight;
   }
   .heading-lg {
-    @apply text-2xl font-semibold leading-tight sm:text-3xl;
+    @apply text-3xl font-semibold leading-tight sm:text-4xl tracking-tight;
   }
   .heading-md {
-    @apply text-xl font-semibold leading-tight;
+    @apply text-2xl font-semibold leading-tight;
   }
 
+  /* Structural elements for cards/surfaces */
   .card-surface {
-    @apply rounded-3xl border border-slate-200 bg-white/90 shadow-lg;
+    @apply border border-slate-100 bg-white transition-all duration-500 hover:shadow-xl hover:shadow-slate-200/50;
   }
 
+  /* Sharp, editorial buttons */
   .btn-primary {
-    @apply rounded-full bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white shadow-lg transition hover:-translate-y-0.5 hover:shadow-xl;
+    @apply bg-ink px-8 py-3.5 text-xs font-bold uppercase tracking-[0.2em] text-white transition-all duration-300 hover:bg-black hover:shadow-xl hover:shadow-black/20 hover:-translate-y-0.5 active:translate-y-0;
   }
   .btn-outline {
-    @apply rounded-full border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-900 shadow-sm transition hover:-translate-y-0.5 hover:border-slate-900;
+    @apply border border-slate-200 bg-white px-8 py-3.5 text-xs font-bold uppercase tracking-[0.2em] text-ink transition-all duration-300 hover:border-ink hover:bg-slate-50 hover:-translate-y-0.5 active:translate-y-0;
   }
+}
+
+/* Base Animations */
+@keyframes fade-in {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }

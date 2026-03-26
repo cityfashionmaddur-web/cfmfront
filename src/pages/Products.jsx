@@ -156,262 +156,120 @@ export default function Products() {
   };
 
   return (
-    <div className="flex flex-col gap-8 pt-12">
-      <section className="flex flex-wrap items-center justify-between gap-4">
+    <div className="flex flex-col gap-12 pt-16 pb-24 container mx-auto px-6 lg:px-12">
+      <section className="flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-gray-200 pb-8">
         <div>
-          <h1 className="text-3xl font-semibold">All Products</h1>
-          <p className="text-slate-600">Search, filter by price, and paginate through the catalog.</p>
+          <h1 className="text-4xl font-heading font-black uppercase tracking-tighter text-ink">The Catalog</h1>
+          <p className="text-gray-400 mt-2 text-xs font-bold uppercase tracking-widest">
+            {products.length} Items // Page {pageState} of {pages}
+          </p>
         </div>
-        <Link className="text-sm font-semibold text-slate-800 underline-offset-4 hover:underline" to="/categories">
-          Browse categories
+        <Link className="text-[10px] font-bold uppercase tracking-[0.2em] text-ink border-b border-ink pb-1 hover:text-gray-500 hover:border-gray-500 transition-colors" to="/categories">
+          Browse Collections
         </Link>
       </section>
 
-      <div className="grid gap-6 lg:grid-cols-[320px_1fr]">
-        <div className="flex flex-col gap-6 lg:col-span-2">
-          <div className="flex flex-wrap items-center gap-3 md:hidden">
+      <div className="grid gap-12 lg:grid-cols-[280px_1fr]">
+        <div className="flex flex-col gap-8 lg:col-span-2">
+          {/* Mobile Filter Toggle */}
+          <div className="flex flex-wrap items-center gap-4 md:hidden">
             <button
               type="button"
               onClick={() => setShowFilters((v) => !v)}
-              className="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-900 shadow-sm"
+              className="btn-secondary w-full"
             >
-              {showFilters ? "Hide filters" : "Show filters"}
+              {showFilters ? "Hide Filters" : "Show Filters"}
             </button>
             {activeFilters.length > 0 && (
               <button
                 type="button"
                 onClick={handleReset}
-                className="rounded-full border border-slate-200 px-3 py-2 text-xs font-semibold text-slate-800 hover:border-slate-900"
+                className="text-[10px] font-bold uppercase tracking-widest text-gray-500 hover:text-ink underline underline-offset-4"
               >
-                Clear all
+                Clear All
               </button>
             )}
           </div>
 
+          {/* Desktop Filter Form */}
           <form
-            className="hidden grid-cols-4 gap-3 rounded-2xl border border-slate-200 bg-white/80 p-4 shadow md:grid"
+            className="hidden grid-cols-4 lg:grid-cols-5 gap-4 md:grid"
             onSubmit={handleSubmit}
           >
             <input
-              className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-base shadow-sm outline-none transition focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10"
-              placeholder="Search products"
+              className="px-4 py-3 text-xs font-bold uppercase tracking-widest border border-gray-200 text-ink placeholder-gray-400 focus:outline-none focus:border-ink transition-colors"
+              placeholder="Search..."
               value={formState.q}
               onChange={(event) => updateParam("q", event.target.value)}
             />
-            <input
-              className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-base shadow-sm outline-none transition focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10"
-              type="number"
-              placeholder="Min price"
-              value={formState.min}
-              onChange={(event) => updateParam("min", event.target.value)}
-            />
-            <input
-              className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-base shadow-sm outline-none transition focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10"
-              type="number"
-              placeholder="Max price"
-              value={formState.max}
-              onChange={(event) => updateParam("max", event.target.value)}
-            />
+            
             <select
-              className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-base shadow-sm outline-none transition focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10"
-              value={formState.sort}
-              onChange={(event) => updateParam("sort", event.target.value)}
-            >
-              <option value="newest">Newest</option>
-              <option value="price_asc">Price: Low to High</option>
-              <option value="price_desc">Price: High to Low</option>
-            </select>
-            <div className="flex items-center gap-3 rounded-xl border border-slate-200 bg-white px-3 py-2 shadow-sm">
-              <div className="flex-1">
-                <label className="text-xs font-semibold text-slate-600">Min</label>
-                <input
-                  className="w-full rounded-lg border border-slate-200 px-2 py-1 text-sm outline-none focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10"
-                  type="number"
-                  value={formState.min}
-                  onChange={(event) => {
-                    updateParam("min", event.target.value);
-                    setRangeMin(Number(event.target.value) || 0);
-                  }}
-                />
-              </div>
-              <div className="flex-1">
-                <label className="text-xs font-semibold text-slate-600">Max</label>
-                <input
-                  className="w-full rounded-lg border border-slate-200 px-2 py-1 text-sm outline-none focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10"
-                  type="number"
-                  value={formState.max}
-                  onChange={(event) => {
-                    updateParam("max", event.target.value);
-                    setRangeMax(Number(event.target.value) || 10000);
-                  }}
-                />
-              </div>
-            </div>
-            <select
-              className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-base shadow-sm outline-none transition focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10"
+              className="px-4 py-3 text-xs font-bold uppercase tracking-widest border border-gray-200 text-ink focus:outline-none focus:border-ink transition-colors appearance-none bg-transparent"
               value={formState.category}
               onChange={(event) => updateParam("category", event.target.value)}
             >
-              <option value="">All categories</option>
+              <option value="">All Categories</option>
               {categories.map((cat) => (
                 <option key={cat.id} value={cat.slug}>
                   {cat.name}
                 </option>
               ))}
             </select>
-            <div className="flex items-center gap-3 lg:col-span-4">
+            
+            <div className="flex items-center gap-2 border border-gray-200 px-4 py-3 focus-within:border-ink transition-colors">
+              <input
+                className="w-full text-xs font-bold uppercase tracking-widest text-ink placeholder-gray-400 focus:outline-none bg-transparent text-center"
+                type="number"
+                placeholder="Min"
+                value={formState.min}
+                onChange={(event) => updateParam("min", event.target.value)}
+              />
+              <span className="text-gray-300">-</span>
+              <input
+                className="w-full text-xs font-bold uppercase tracking-widest text-ink placeholder-gray-400 focus:outline-none bg-transparent text-center"
+                type="number"
+                placeholder="Max"
+                value={formState.max}
+                onChange={(event) => updateParam("max", event.target.value)}
+              />
+            </div>
+
+            <select
+              className="px-4 py-3 text-xs font-bold uppercase tracking-widest border border-gray-200 text-ink focus:outline-none focus:border-ink transition-colors appearance-none bg-transparent"
+              value={formState.sort}
+              onChange={(event) => updateParam("sort", event.target.value)}
+            >
+              <option value="newest">Newest</option>
+              <option value="price_asc">Price (Low)</option>
+              <option value="price_desc">Price (High)</option>
+            </select>
+
+            <div className="flex items-center gap-2">
               <button
-                className="rounded-full bg-slate-900 px-4 py-2 text-sm font-semibold text-white shadow-lg transition hover:-translate-y-0.5"
+                className="flex-1 btn-primary"
                 type="submit"
               >
                 Apply
               </button>
-              <button
-                className="rounded-full border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-800 hover:border-slate-900"
-                type="button"
-                onClick={handleReset}
-              >
-                Reset
-              </button>
+              {activeFilters.length > 0 && (
+                <button
+                  className="px-4 py-3 text-xs font-bold uppercase tracking-widest text-gray-500 hover:text-ink transition-colors"
+                  type="button"
+                  onClick={handleReset}
+                >
+                  Clear
+                </button>
+              )}
             </div>
           </form>
 
-          {showFilters && (
-            <div className="fixed inset-0 z-40 bg-black/40 backdrop-blur-sm md:hidden" onClick={() => setShowFilters(false)}>
-              <div
-                className="absolute inset-y-0 right-0 w-full max-w-sm translate-x-0 overflow-y-auto rounded-l-3xl bg-white p-5 shadow-2xl transition duration-200"
-                onClick={(event) => event.stopPropagation()}
-              >
-                <div className="mb-4 flex items-center justify-between">
-                  <h3 className="text-lg font-semibold text-slate-900">Filters</h3>
-                  <button
-                    type="button"
-                    className="rounded-full border border-slate-200 px-3 py-1 text-sm font-semibold text-slate-800"
-                    onClick={() => setShowFilters(false)}
-                  >
-                    Close
-                  </button>
-                </div>
-                <div className="space-y-4">
-                  <input
-                    className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-base shadow-sm outline-none transition focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10"
-                    placeholder="Search products"
-                    value={formState.q}
-                    onChange={(event) => updateParam("q", event.target.value)}
-                  />
-                  <div className="grid grid-cols-2 gap-3">
-                    <div>
-                      <label className="text-xs font-semibold text-slate-600">Min price</label>
-                      <input
-                        className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-base shadow-sm outline-none transition focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10"
-                        type="number"
-                        value={formState.min}
-                        onChange={(event) => {
-                          updateParam("min", event.target.value);
-                          setRangeMin(Number(event.target.value) || 0);
-                        }}
-                      />
-                    </div>
-                    <div>
-                      <label className="text-xs font-semibold text-slate-600">Max price</label>
-                      <input
-                        className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-base shadow-sm outline-none transition focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10"
-                        type="number"
-                        value={formState.max}
-                        onChange={(event) => {
-                          updateParam("max", event.target.value);
-                          setRangeMax(Number(event.target.value) || 10000);
-                        }}
-                      />
-                    </div>
-                  </div>
-                  <div className="space-y-2">
-                    <label className="text-xs font-semibold text-slate-600">Price range</label>
-                    <div className="flex items-center gap-2 text-xs text-slate-600">
-                      <span>₹{rangeMin}</span>
-                      <input
-                        type="range"
-                        min="0"
-                        max="20000"
-                        step="100"
-                        value={rangeMin}
-                        onChange={(e) => {
-                          const value = Number(e.target.value);
-                          setRangeMin(value);
-                          updateParam("min", String(value));
-                        }}
-                        className="h-1 flex-1 cursor-pointer accent-slate-900"
-                      />
-                      <input
-                        type="range"
-                        min="0"
-                        max="20000"
-                        step="100"
-                        value={rangeMax}
-                        onChange={(e) => {
-                          const value = Number(e.target.value);
-                          setRangeMax(value);
-                          updateParam("max", String(value));
-                        }}
-                        className="h-1 flex-1 cursor-pointer accent-slate-900"
-                      />
-                      <span>₹{rangeMax}</span>
-                    </div>
-                  </div>
-                  <div className="space-y-2">
-                    <label className="text-xs font-semibold text-slate-600">Sort</label>
-                    <select
-                      className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-base shadow-sm outline-none transition focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10"
-                      value={formState.sort}
-                      onChange={(event) => updateParam("sort", event.target.value)}
-                    >
-                      <option value="newest">Newest</option>
-                      <option value="price_asc">Price: Low to High</option>
-                      <option value="price_desc">Price: High to Low</option>
-                    </select>
-                  </div>
-                  <div className="space-y-2">
-                    <label className="text-xs font-semibold text-slate-600">Category</label>
-                    <select
-                      className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-base shadow-sm outline-none transition focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10"
-                      value={formState.category}
-                      onChange={(event) => updateParam("category", event.target.value)}
-                    >
-                      <option value="">All categories</option>
-                      {categories.map((cat) => (
-                        <option key={cat.id} value={cat.slug}>
-                          {cat.name}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <button
-                      className="flex-1 rounded-full bg-slate-900 px-4 py-2 text-sm font-semibold text-white shadow-lg transition hover:-translate-y-0.5"
-                      type="button"
-                      onClick={handleSubmit}
-                    >
-                      Apply
-                    </button>
-                    <button
-                      className="flex-1 rounded-full border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-800 hover:border-slate-900"
-                      type="button"
-                      onClick={handleReset}
-                    >
-                      Reset
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-
+          {/* Active Filter Chips */}
           {activeFilters.length > 0 && (
-            <div className="flex flex-wrap items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2 pt-2">
               {activeFilters.map((label, idx) => (
                 <span
                   key={`${label}-${idx}`}
-                  className="rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-semibold text-slate-700"
+                  className="px-3 py-1 bg-gray-100 text-[9px] font-black uppercase tracking-widest text-ink"
                 >
                   {label}
                 </span>
@@ -420,74 +278,180 @@ export default function Products() {
           )}
 
           {error && (
-            <div className="rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
+            <div className="p-4 border border-red-200 bg-red-50 text-[10px] font-bold uppercase tracking-widest text-red-600 text-center">
               {error}
             </div>
           )}
 
           {loading && products.length === 0 ? (
-            <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
-              {[...Array(6)].map((_, idx) => (
-                <div key={idx} className="animate-pulse rounded-3xl border border-slate-200 bg-white/80 p-4 shadow-lg">
-                  <div className="mb-4 h-48 rounded-2xl bg-slate-200" />
-                  <div className="mb-2 h-4 rounded bg-slate-200" />
-                  <div className="h-4 w-1/2 rounded bg-slate-200" />
+            <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-x-4 md:gap-x-8 gap-y-12">
+              {[...Array(8)].map((_, idx) => (
+                <div key={idx} className="space-y-4">
+                  <div className="bg-gray-100 aspect-[3/4] w-full animate-pulse" />
+                  <div className="flex flex-col items-center gap-2">
+                    <div className="h-3 bg-gray-100 w-1/2 animate-pulse" />
+                    <div className="h-3 bg-gray-100 w-1/4 animate-pulse" />
+                  </div>
                 </div>
               ))}
             </div>
           ) : (
-            <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+            <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-x-4 md:gap-x-8 gap-y-12 md:gap-y-16">
               {products.length ? (
                 products.map((product) => <ProductCard key={product.id} product={product} />)
               ) : (
-                <div className="flex flex-col items-center gap-2 rounded-2xl border border-dashed border-slate-300 bg-white/70 p-10 text-center text-slate-500 shadow-inner">
-                  No products match your filters yet.
+                <div className="col-span-full py-24 flex flex-col items-center justify-center text-center border border-gray-200 bg-gray-50/50">
+                  <p className="text-sm font-bold uppercase tracking-widest text-gray-500 mb-4">No matching pieces found.</p>
+                  <button onClick={handleReset} className="btn-secondary">Reset Filters</button>
                 </div>
               )}
             </div>
           )}
 
           {hasMore && (
-            <div className="flex justify-center">
+            <div className="flex justify-center pt-12">
               <button
                 onClick={loadMore}
                 disabled={loading}
-                className="rounded-full border border-slate-200 bg-white px-5 py-2 text-sm font-semibold text-slate-900 shadow-sm transition hover:-translate-y-0.5 disabled:opacity-50"
+                className="btn-secondary min-w-[200px]"
               >
-                {loading ? "Loading..." : "Show more"}
+                {loading ? "Loading..." : "Load More"}
               </button>
             </div>
           )}
 
-          <div className="flex flex-wrap items-center justify-center gap-2">
-            {pagination.map((_, idx) => {
-              const params = new URLSearchParams({
-                page: String(idx + 1),
-                limit: String(PAGE_SIZE),
-                sort
-              });
-              if (q) params.set("q", q);
-              if (min) params.set("min", min);
-              if (max) params.set("max", max);
-              if (category) params.set("category", category);
-
-              return (
-                <Link
-                  key={idx}
-                  to={`/products?${params.toString()}`}
-                  className={
-                    idx + 1 === pageState
-                      ? "rounded-full border border-slate-900 bg-slate-900 px-3 py-1.5 text-sm font-semibold text-white"
-                      : "rounded-full border border-slate-200 px-3 py-1.5 text-sm font-semibold text-slate-700 hover:border-slate-900"
-                  }
-                >
-                  {idx + 1}
-                </Link>
-              );
-            })}
-          </div>
+          {!hasMore && pages > 1 && (
+             <div className="flex justify-center pt-16 border-t border-gray-100 mt-8">
+               <div className="flex gap-4">
+                 {pagination.map((_, idx) => {
+                   const params = new URLSearchParams({
+                     page: String(idx + 1),
+                     limit: String(PAGE_SIZE),
+                     sort
+                   });
+                   if (q) params.set("q", q);
+                   if (min) params.set("min", min);
+                   if (max) params.set("max", max);
+                   if (category) params.set("category", category);
+                   
+                   const isActive = idx + 1 === pageState;
+                   return (
+                     <Link
+                       key={idx}
+                       to={`/products?${params.toString()}`}
+                       className={`w-12 h-12 flex items-center justify-center text-[10px] font-black uppercase tracking-widest transition-colors border ${
+                         isActive
+                           ? "bg-ink text-white border-ink"
+                           : "bg-transparent text-gray-400 border-gray-200 hover:border-ink hover:text-ink"
+                       }`}
+                     >
+                       {String(idx + 1).padStart(2, '0')}
+                     </Link>
+                   );
+                 })}
+               </div>
+             </div>
+          )}
         </div>
       </div>
+
+      {/* Mobile Filters Modal */}
+      {showFilters && (
+        <div className="fixed inset-0 z-50 flex justify-end bg-black/60 backdrop-blur-sm" onClick={() => setShowFilters(false)}>
+          <div
+            className="w-full max-w-xs bg-white h-full overflow-y-auto p-6 flex flex-col animate-in slide-in-from-right"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <div className="flex items-center justify-between mb-8 border-b border-gray-100 pb-4">
+              <h3 className="text-xl font-heading font-black tracking-tight text-ink uppercase">Filters</h3>
+              <button
+                type="button"
+                className="text-[10px] font-bold uppercase tracking-widest text-gray-400 hover:text-ink"
+                onClick={() => setShowFilters(false)}
+              >
+                Close
+              </button>
+            </div>
+            
+            <div className="space-y-6 flex-1">
+              <div className="space-y-2">
+                <label className="text-[10px] font-bold uppercase tracking-widest text-gray-500">Search</label>
+                <input
+                  className="w-full border-b border-gray-200 bg-transparent px-0 py-2 text-sm font-medium text-ink focus:outline-none focus:border-ink transition-colors"
+                  placeholder="Keywords..."
+                  value={formState.q}
+                  onChange={(event) => updateParam("q", event.target.value)}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-[10px] font-bold uppercase tracking-widest text-gray-500">Category</label>
+                <select
+                  className="w-full border-b border-gray-200 bg-transparent px-0 py-2 text-sm font-medium text-ink focus:outline-none focus:border-ink transition-colors appearance-none"
+                  value={formState.category}
+                  onChange={(event) => updateParam("category", event.target.value)}
+                >
+                  <option value="">All Categories</option>
+                  {categories.map((cat) => (
+                    <option key={cat.id} value={cat.slug}>{cat.name}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <label className="text-[10px] font-bold uppercase tracking-widest text-gray-500">Min Price</label>
+                  <input
+                    className="w-full border-b border-gray-200 bg-transparent px-0 py-2 text-sm font-medium text-ink focus:outline-none focus:border-ink transition-colors"
+                    type="number"
+                    value={formState.min}
+                    onChange={(e) => updateParam("min", e.target.value)}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-[10px] font-bold uppercase tracking-widest text-gray-500">Max Price</label>
+                  <input
+                    className="w-full border-b border-gray-200 bg-transparent px-0 py-2 text-sm font-medium text-ink focus:outline-none focus:border-ink transition-colors"
+                    type="number"
+                    value={formState.max}
+                    onChange={(e) => updateParam("max", e.target.value)}
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-[10px] font-bold uppercase tracking-widest text-gray-500">Sort By</label>
+                <select
+                  className="w-full border-b border-gray-200 bg-transparent px-0 py-2 text-sm font-medium text-ink focus:outline-none focus:border-ink transition-colors appearance-none"
+                  value={formState.sort}
+                  onChange={(event) => updateParam("sort", event.target.value)}
+                >
+                  <option value="newest">Newest Arriving</option>
+                  <option value="price_asc">Price: Low to High</option>
+                  <option value="price_desc">Price: High to Low</option>
+                </select>
+              </div>
+            </div>
+
+            <div className="pt-8 space-y-3 mt-auto border-t border-gray-100">
+              <button
+                className="w-full btn-primary"
+                type="button"
+                onClick={handleSubmit}
+              >
+                Apply Filters
+              </button>
+              <button
+                className="w-full btn-secondary"
+                type="button"
+                onClick={handleReset}
+              >
+                Reset All
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

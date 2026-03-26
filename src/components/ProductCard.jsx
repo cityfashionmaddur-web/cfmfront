@@ -17,16 +17,16 @@ export default function ProductCard({ product }) {
 
   return (
     <div className="group relative flex flex-col">
-      <Link to={`/products/${product.slug}`} className="relative block overflow-hidden bg-slate-100 aspect-[4/5]">
+      <Link to={`/products/${product.slug}`} className="relative block overflow-hidden bg-gray-50 aspect-[3/4]">
         {primaryImage ? (
           <img
             src={primaryImage}
             alt={product.title}
             loading="lazy"
-            className="h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
+            className="h-full w-full object-cover transition-transform duration-1000 ease-[0.25,1,0.5,1] group-hover:scale-105"
           />
         ) : (
-          <div className="flex h-full w-full items-center justify-center text-slate-300 bg-slate-50">No Image</div>
+          <div className="flex h-full w-full items-center justify-center text-gray-300 bg-gray-50 font-medium text-xs tracking-widest uppercase">No Image</div>
         )}
 
         {secondaryImage && (
@@ -35,40 +35,38 @@ export default function ProductCard({ product }) {
             alt=""
             aria-hidden="true"
             loading="lazy"
-            className="absolute inset-0 h-full w-full object-cover opacity-0 transition-opacity duration-500 ease-out group-hover:opacity-100"
+            className="absolute inset-0 h-full w-full object-cover opacity-0 transition-opacity duration-700 ease-[0.25,1,0.5,1] group-hover:opacity-100"
           />
         )}
 
-        <div className="absolute top-2 left-2 flex flex-col gap-1">
+        {/* Status Badges */}
+        <div className="absolute top-3 left-3 flex flex-col gap-2">
           {isOut && (
-            <span className="inline-block bg-white/90 backdrop-blur-sm px-2 py-1 text-[10px] font-bold uppercase tracking-widest text-slate-900">
+            <span className="inline-block bg-white px-3 py-1 text-[9px] font-black uppercase tracking-[0.2em] text-ink shadow-sm">
               Sold Out
             </span>
           )}
           {!isOut && isLowStock && (
-            <span className="inline-block bg-white/90 backdrop-blur-sm px-2 py-1 text-[10px] font-bold uppercase tracking-widest text-orange-600">
-              Low Stock
+            <span className="inline-block bg-ink px-3 py-1 text-[9px] font-black uppercase tracking-[0.2em] text-white shadow-sm">
+              Few Left
             </span>
           )}
           {!isOut && isNew && (
-            <span className="inline-block bg-white/90 backdrop-blur-sm px-2 py-1 text-[10px] font-bold uppercase tracking-widest text-slate-900">
-              New
+            <span className="inline-block bg-white px-3 py-1 text-[9px] font-black uppercase tracking-[0.2em] text-ink shadow-sm">
+              New Output
             </span>
           )}
         </div>
       </Link>
 
-      <div className="mt-3 flex flex-col gap-1">
-        <div className="flex justify-between items-start gap-4">
-          <Link
-            to={`/products/${product.slug}`}
-            className="text-sm font-medium text-slate-900 hover:text-slate-600 transition-colors line-clamp-1"
-          >
-            {product.title}
-          </Link>
-          <p className="text-sm font-normal text-slate-900 whitespace-nowrap">{formatPrice(product.price)}</p>
-        </div>
-        <p className="text-xs text-slate-500 capitalize">{product.category?.name || "Collection"}</p>
+      <div className="mt-4 flex flex-col gap-1 items-center text-center">
+        <Link
+          to={`/products/${product.slug}`}
+          className="text-xs font-bold uppercase tracking-[0.15em] text-ink hover:text-gray-500 transition-colors line-clamp-1"
+        >
+          {product.title}
+        </Link>
+        <p className="text-xs font-medium text-gray-500 mt-1">{formatPrice(product.price)}</p>
       </div>
     </div>
   );
