@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import ProductCard from "../components/ProductCard.jsx";
 import { apiGet } from "../utils/api.js";
+import useDebounce from "../hooks/useDebounce.js";
 
 const PAGE_SIZE = 12;
 
@@ -30,6 +31,18 @@ export default function Products() {
   const [showFilters, setShowFilters] = useState(false);
   const [rangeMin, setRangeMin] = useState(0);
   const [rangeMax, setRangeMax] = useState(10000);
+
+  const debouncedQ = useDebounce(formState.q, 500);
+  
+  useEffect(() => {
+    if (debouncedQ !== (q || "")) {
+      const next = new URLSearchParams(searchParams);
+      if (debouncedQ) next.set("q", debouncedQ);
+      else next.delete("q");
+      next.set("page", "1");
+      setSearchParams(next);
+    }
+  }, [debouncedQ, q, searchParams, setSearchParams]);
 
   const PROFILE_KEY = "cityfashion.profile";
 

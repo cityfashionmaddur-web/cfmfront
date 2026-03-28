@@ -2,6 +2,7 @@ import React from "react";
 import { Route, Routes } from "react-router-dom";
 import Layout from "./components/Layout.jsx";
 import ScrollToTop from "./components/ScrollToTop.jsx";
+import WhatsAppFloat from "./components/WhatsAppFloat.jsx";
 import AdminLayout from "./components/admin/AdminLayout.jsx";
 import Home from "./pages/Home.jsx";
 import Products from "./pages/Products.jsx";
@@ -37,6 +38,7 @@ export default function App() {
   return (
     <>
       <ScrollToTop />
+      <WhatsAppFloat />
       <Routes>
         <Route element={<Layout />}>
           <Route path="/" element={<Home />} />

@@ -2,12 +2,14 @@ import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { adminDelete, adminGet, adminPost } from "../../utils/adminApi.js";
 import { Plus, Edit, Trash2, Layers, Search } from "lucide-react";
+import useDebounce from "../../hooks/useDebounce.js";
 
 export default function AdminCategories() {
   const [categories, setCategories] = useState([]);
   const [form, setForm] = useState({ name: "", description: "" });
   const [status, setStatus] = useState({ loading: false, error: "", saving: false });
   const [searchTerm, setSearchTerm] = useState("");
+  const debouncedSearch = useDebounce(searchTerm, 500);
 
   const load = async () => {
     setStatus((prev) => ({ ...prev, loading: true, error: "" }));
@@ -58,8 +60,8 @@ export default function AdminCategories() {
   };
 
   const filteredCategories = categories.filter(c => 
-    c.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    c.slug.toLowerCase().includes(searchTerm.toLowerCase())
+    c.name.toLowerCase().includes(debouncedSearch.toLowerCase()) ||
+    c.slug.toLowerCase().includes(debouncedSearch.toLowerCase())
   );
 
   return (

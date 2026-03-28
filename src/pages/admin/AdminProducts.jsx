@@ -3,11 +3,13 @@ import { Link } from "react-router-dom";
 import { adminDelete, adminGet } from "../../utils/adminApi.js";
 import { formatPrice } from "../../utils/format.js";
 import { Plus, Edit, Trash2, Package, Search } from "lucide-react";
+import useDebounce from "../../hooks/useDebounce.js";
 
 export default function AdminProducts() {
   const [products, setProducts] = useState([]);
   const [status, setStatus] = useState({ loading: false, error: "", deleting: null });
   const [searchTerm, setSearchTerm] = useState("");
+  const debouncedSearch = useDebounce(searchTerm, 500);
 
   useEffect(() => {
     let active = true;
@@ -46,8 +48,8 @@ export default function AdminProducts() {
   };
 
   const filteredProducts = products.filter(p => 
-    p.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    p.category?.name?.toLowerCase().includes(searchTerm.toLowerCase())
+    p.title.toLowerCase().includes(debouncedSearch.toLowerCase()) ||
+    p.category?.name?.toLowerCase().includes(debouncedSearch.toLowerCase())
   );
 
   return (

@@ -15,6 +15,7 @@ import {
   Clock,
   ChevronRight
 } from "lucide-react";
+import useDebounce from "../../hooks/useDebounce.js";
 
 const STATUS_OPTIONS = ["PENDING", "PAID", "SHIPPED", "DELIVERED", "CANCELLED"];
 
@@ -32,6 +33,8 @@ export default function AdminOrders() {
   const [draftStatus, setDraftStatus] = useState({});
   const [draftTracking, setDraftTracking] = useState({});
   const [filters, setFilters] = useState({ status: "", from: "", to: "" });
+  const [searchTerm, setSearchTerm] = useState("");
+  const debouncedSearch = useDebounce(searchTerm, 500);
   const [page, setPage] = useState(1);
   const [total, setTotal] = useState(0);
   const pageSize = 10;
@@ -46,6 +49,7 @@ export default function AdminOrders() {
         if (filters.status) query.set("status", filters.status);
         if (filters.from) query.set("from", filters.from);
         if (filters.to) query.set("to", filters.to);
+        if (debouncedSearch) query.set("search", debouncedSearch);
         query.set("page", String(page));
         query.set("pageSize", String(pageSize));
         const res = await adminGet(`/admin/orders?${query.toString()}`);
@@ -74,7 +78,7 @@ export default function AdminOrders() {
     return () => {
       active = false;
     };
-  }, [filters.status, page]);
+  }, [filters.status, page, debouncedSearch]);
 
   const handleStatusChange = (id, value) => {
     setDraftStatus((prev) => ({ ...prev, [id]: value }));
@@ -161,6 +165,20 @@ export default function AdminOrders() {
         
         <div className="flex flex-col gap-4 w-full lg:w-auto">
           <div className="flex flex-wrap items-center gap-3">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
+              <input 
+                type="text" 
+                placeholder="Search orders..." 
+                className="pl-9 pr-4 py-2 rounded-2xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all text-sm w-full md:w-48"
+                value={searchTerm}
+                onChange={(e) => {
+                  setSearchTerm(e.target.value);
+                  setPage(1);
+                }}
+              />
+            </div>
+            
             <div className="relative">
               <Filter size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
               <select

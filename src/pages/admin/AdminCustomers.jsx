@@ -2,11 +2,13 @@ import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { adminGet } from "../../utils/adminApi.js";
 import { Users, Search, Eye, ShieldCheck, Mail } from "lucide-react";
+import useDebounce from "../../hooks/useDebounce.js";
 
 export default function AdminCustomers() {
   const [customers, setCustomers] = useState([]);
   const [status, setStatus] = useState({ loading: false, error: "" });
   const [searchTerm, setSearchTerm] = useState("");
+  const debouncedSearch = useDebounce(searchTerm, 500);
 
   useEffect(() => {
     let active = true;
@@ -32,8 +34,8 @@ export default function AdminCustomers() {
   }, []);
 
   const filteredCustomers = customers.filter(c => 
-    c.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    c.email?.toLowerCase().includes(searchTerm.toLowerCase())
+    c.name?.toLowerCase().includes(debouncedSearch.toLowerCase()) ||
+    c.email?.toLowerCase().includes(debouncedSearch.toLowerCase())
   );
 
   return (
