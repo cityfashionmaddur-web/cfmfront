@@ -24,8 +24,22 @@ export default function Cart() {
         (data?.products || []).forEach((product) => {
           if (product?.id !== undefined) {
              items.filter(i => i.id === product.id).forEach(cartItem => {
-               const variant = product.variants?.find(v => v.size === cartItem.size);
-               const stock = variant ? variant.stock : product.stock;
+               let stock = 0;
+               if (product.isCombo && cartItem.size) {
+                 const [topPart, bottomPart] = cartItem.size.split(' | ');
+                 if (topPart && bottomPart) {
+                   const topSize = topPart.replace(' Top', '').trim();
+                   const bottomSize = bottomPart.replace(' Bottom', '').trim();
+                   const topStock = (product.comboTopSizes && product.comboTopSizes[topSize]) || 0;
+                   const bottomStock = (product.comboBottomSizes && product.comboBottomSizes[bottomSize]) || 0;
+                   stock = Math.min(topStock, bottomStock);
+                 }
+               } else if (product.variants?.length > 0) {
+                 const variant = product.variants.find(v => v.size === cartItem.size && v.color === cartItem.color);
+                 stock = variant ? variant.stock : 0;
+               } else {
+                 stock = product.stock || 0;
+               }
                updateItemStock(cartItem.cartItemId, stock);
             });
           }
