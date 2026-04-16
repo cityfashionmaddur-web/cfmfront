@@ -2,13 +2,8 @@ import React, { useEffect, useRef, useState } from "react";
 import { Link, NavLink, useLocation } from "react-router-dom";
 import { useCart } from "../context/CartContext.jsx";
 import { useAuth } from "../context/AuthContext.jsx";
-import { Menu, X, ShoppingBag, User } from "lucide-react";
-
-const links = [
-  { to: "/", label: "Home" },
-  { to: "/products", label: "Shop" },
-  { to: "/categories", label: "Collections" },
-];
+import { apiGet } from "../utils/api.js";
+import { Menu, X, ShoppingBag, User, ChevronDown } from "lucide-react";
 
 export default function NavBar() {
   const { count } = useCart();
@@ -16,14 +11,25 @@ export default function NavBar() {
 
   const [open, setOpen] = useState(false);
   const [profileMenuOpen, setProfileMenuOpen] = useState(false);
+  const [collections, setCollections] = useState([]);
+  const [activeDropdown, setActiveDropdown] = useState(null); // desktop hover
+  const [expandedMobile, setExpandedMobile] = useState(null); // mobile tap
   const profileRef = useRef(null);
+  const dropdownTimeout = useRef(null);
   const location = useLocation();
 
   // close menus on route change
   useEffect(() => {
     setOpen(false);
     setProfileMenuOpen(false);
+    setActiveDropdown(null);
+    setExpandedMobile(null);
   }, [location.pathname]);
+
+  // Fetch nav collections
+  useEffect(() => {
+    apiGet("/store/collections/nav").then(setCollections).catch(() => setCollections([]));
+  }, []);
 
   // click outside closes profile menu
   useEffect(() => {
@@ -44,11 +50,24 @@ export default function NavBar() {
         : "text-gray-400 hover:text-ink after:content-[''] after:absolute after:bottom-0 after:left-0 after:w-0 after:h-[2px] after:bg-ink after:transition-all hover:after:w-full"
     }`;
 
+  const handleMouseEnter = (colId) => {
+    clearTimeout(dropdownTimeout.current);
+    setActiveDropdown(colId);
+  };
+
+  const handleMouseLeave = () => {
+    dropdownTimeout.current = setTimeout(() => setActiveDropdown(null), 200);
+  };
+
+  const staticLinks = [
+    { to: "/", label: "Home" },
+    { to: "/products", label: "Shop" },
+  ];
+
   return (
     <>
       <header className={`fixed top-0 left-0 right-0 z-50 ${bgClass}`}>
         <div className="mx-auto max-w-7xl px-6 lg:px-12">
-          {/* navbar height is exactly h-20 for more breathing room */}
           <div className="flex h-20 items-center justify-between gap-4">
             
             {/* Left: Mobile Menu & Logo */}
@@ -75,10 +94,60 @@ export default function NavBar() {
 
             {/* Center: Desktop Navigation */}
             <nav className="hidden lg:flex items-center justify-center gap-10 lg:w-1/3">
-              {links.map((link) => (
+              {staticLinks.map((link) => (
                 <NavLink key={link.to} to={link.to} className={desktopLinkClass}>
                   {link.label}
                 </NavLink>
+              ))}
+
+              {/* Collection Dropdowns */}
+              {collections.map((col) => (
+                <div
+                  key={col.id}
+                  className="relative"
+                  onMouseEnter={() => handleMouseEnter(col.id)}
+                  onMouseLeave={handleMouseLeave}
+                >
+                  <button
+                    className={`flex items-center gap-1 text-xs font-bold uppercase tracking-[0.15em] transition-all duration-300 py-2 ${
+                      activeDropdown === col.id ? "text-ink" : "text-gray-400 hover:text-ink"
+                    }`}
+                  >
+                    {col.name}
+                    <ChevronDown
+                      size={12}
+                      strokeWidth={2.5}
+                      className={`transition-transform duration-300 ${activeDropdown === col.id ? "rotate-180" : ""}`}
+                    />
+                  </button>
+
+                  {/* Desktop Dropdown */}
+                  <div
+                    className={`absolute top-full left-1/2 -translate-x-1/2 mt-2 min-w-[200px] bg-white border border-gray-100 shadow-2xl transition-all duration-300 origin-top ${
+                      activeDropdown === col.id
+                        ? "opacity-100 scale-100 pointer-events-auto"
+                        : "opacity-0 scale-95 pointer-events-none"
+                    }`}
+                    onMouseEnter={() => handleMouseEnter(col.id)}
+                    onMouseLeave={handleMouseLeave}
+                  >
+                    <div className="py-2">
+                      {col.categories?.length > 0 ? (
+                        col.categories.map((cat) => (
+                          <Link
+                            key={cat.id}
+                            to={`/categories/${cat.slug}`}
+                            className="block px-6 py-3 text-[11px] font-bold uppercase tracking-widest text-gray-500 hover:text-ink hover:bg-gray-50 transition-colors"
+                          >
+                            {cat.name}
+                          </Link>
+                        ))
+                      ) : (
+                        <div className="px-6 py-3 text-[11px] text-gray-400 font-medium">No categories yet</div>
+                      )}
+                    </div>
+                  </div>
+                </div>
               ))}
             </nav>
 
@@ -156,19 +225,51 @@ export default function NavBar() {
         }`}
       >
         <div className="pt-24 px-6 h-full flex flex-col justify-between pb-12 overflow-y-auto">
-           <nav className="flex flex-col space-y-8 mt-8">
-             {links.map((link, index) => (
+           <nav className="flex flex-col space-y-6 mt-8">
+             {staticLinks.map((link, index) => (
                <NavLink
                  key={link.to}
                  to={link.to}
                  className={({ isActive }) =>
-                   `text-4xl sm:text-5xl font-heading tracking-tight transition-all duration-500 delay-${index * 100} ${
+                   `text-4xl sm:text-5xl font-heading tracking-tight transition-all duration-500 ${
                      isActive ? "text-ink font-bold" : "text-gray-300 hover:text-ink"
                    } ${open ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'}`
                  }
                >
                  {link.label}
                </NavLink>
+             ))}
+
+             {/* Mobile Collection Accordions */}
+             {collections.map((col) => (
+               <div key={col.id} className={`transition-all duration-500 ${open ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'}`}>
+                 <button
+                   onClick={() => setExpandedMobile(expandedMobile === col.id ? null : col.id)}
+                   className="flex items-center justify-between w-full text-left"
+                 >
+                   <span className={`text-4xl sm:text-5xl font-heading tracking-tight transition-colors ${expandedMobile === col.id ? 'text-ink' : 'text-gray-300 hover:text-ink'}`}>
+                     {col.name}
+                   </span>
+                   <ChevronDown
+                     size={24}
+                     className={`text-gray-300 transition-transform duration-300 ${expandedMobile === col.id ? "rotate-180 text-ink" : ""}`}
+                   />
+                 </button>
+
+                 <div className={`overflow-hidden transition-all duration-500 ease-[0.16,1,0.3,1] ${expandedMobile === col.id ? "max-h-96 opacity-100 mt-4" : "max-h-0 opacity-0"}`}>
+                   <div className="pl-4 space-y-4 border-l-2 border-gray-100">
+                     {col.categories?.map((cat) => (
+                       <Link
+                         key={cat.id}
+                         to={`/categories/${cat.slug}`}
+                         className="block text-lg font-bold uppercase tracking-widest text-gray-400 hover:text-ink transition-colors"
+                       >
+                         {cat.name}
+                       </Link>
+                     ))}
+                   </div>
+                 </div>
+               </div>
              ))}
            </nav>
 

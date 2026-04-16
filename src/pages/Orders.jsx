@@ -168,6 +168,12 @@ export default function Orders() {
                           </h4>
                           <div className="flex items-center gap-3 text-xs font-bold uppercase tracking-widest text-gray-500 mb-3">
                             <span>{item.size || "Standard"}</span>
+                            {item.color && item.color !== 'Default' && item.color !== '' && (
+                              <>
+                                <span className="w-1 h-1 rounded-full bg-gray-300"></span>
+                                <span>{item.color}</span>
+                              </>
+                            )}
                             <span className="w-1 h-1 rounded-full bg-gray-300"></span>
                             <span>Qty: {item.quantity}</span>
                           </div>

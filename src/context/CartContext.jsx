@@ -60,18 +60,18 @@ export function CartProvider({ children }) {
     [items]
   );
 
-  const addItem = (product, quantity = 1, size = null) => {
+  const addItem = (product, quantity = 1, size = null, color = null) => {
     if (!product) return false;
     
     let stock = Infinity;
     if (size && product.variants?.length > 0) {
-      const variant = product.variants.find(v => v.size === size);
+      const variant = product.variants.find(v => v.size === size && (!color || v.color === color));
       stock = variant ? variant.stock : 0;
     } else if (product.stock !== undefined) {
       stock = product.stock;
     }
 
-    const cartItemId = size ? `${product.id}-${size}` : String(product.id);
+    const cartItemId = size || color ? `${product.id}-${size || 'nosize'}-${color || 'Default'}` : String(product.id);
 
     const existing = items.find((p) => p.cartItemId === cartItemId);
     const currentQty = existing ? existing.quantity || 1 : 0;
@@ -101,7 +101,8 @@ export function CartProvider({ children }) {
           image: product.productImages?.[0]?.url,
           quantity: quantity || 1,
           stock,
-          size
+          size,
+          color
         }
       ];
     });

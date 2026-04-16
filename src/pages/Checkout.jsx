@@ -184,7 +184,7 @@ export default function Checkout() {
         {
           currency: "INR",
           receipt: `cf-${Date.now()}`,
-          items: items.map((item) => ({ productId: item.id, quantity: item.quantity, size: item.size })),
+          items: items.map((item) => ({ productId: item.id, quantity: item.quantity, size: item.size, color: item.color })),
           ...formState
         },
         { auth: true }
@@ -369,6 +369,9 @@ export default function Checkout() {
                       <h3 className="text-[11px] font-bold uppercase tracking-wider text-ink pr-2">{item.title}</h3>
                       {item.size && (
                         <p className="text-[9px] font-black uppercase tracking-widest text-gray-400 mt-1">Dimension: {item.size}</p>
+                      )}
+                      {item.color && item.color !== 'Default' && item.color !== '' && (
+                        <p className="text-[9px] font-black uppercase tracking-widest text-gray-400 mt-0.5">Color: {item.color}</p>
                       )}
                     </div>
                     <span className="text-xs font-bold text-ink whitespace-nowrap">{formatPrice(Number(item.price) * item.quantity)}</span>

@@ -301,6 +301,11 @@ export default function AdminOrders() {
                                   {item.size}
                                </span>
                              )}
+                             {item.color && item.color !== 'Default' && item.color !== '' && (
+                               <span className="bg-slate-100 text-slate-500 font-black uppercase tracking-wider text-[9px] px-1.5 py-0.5 rounded-md border border-slate-200">
+                                  {item.color}
+                               </span>
+                             )}
                              <span className="text-slate-400 font-bold text-[10px]">x{item.quantity}</span>
                           </div>
                         ))}

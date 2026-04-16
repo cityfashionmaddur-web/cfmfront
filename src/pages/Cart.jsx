@@ -114,6 +114,11 @@ export default function Cart() {
                         Size: {item.size}
                       </span>
                     )}
+                    {item.color && item.color !== 'Default' && item.color !== '' && (
+                      <span className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-500 border border-gray-200 px-3 py-1">
+                        Color: {item.color}
+                      </span>
+                    )}
                   </div>
 
                   <div className="mt-auto pt-6 flex flex-wrap gap-4 items-center">

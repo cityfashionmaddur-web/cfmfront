@@ -24,7 +24,13 @@ const emptyForm = {
   variants: [],
   images: "",
   categoryId: "",
-  active: true
+  instagramLink: "",
+  colorGroup: "",
+  colorLabel: "",
+  active: true,
+  isCombo: false,
+  comboTopSizes: [],
+  comboBottomSizes: []
 };
 
 export default function AdminProductForm({ mode = "edit" }) {
@@ -65,7 +71,13 @@ export default function AdminProductForm({ mode = "edit" }) {
             variants: productData.variants || [],
             images: (productData.productImages || []).map((img) => img.url).join("\n"),
             categoryId: productData.categoryId || "",
-            active: productData.active ?? true
+            instagramLink: productData.instagramLink || "",
+            colorGroup: productData.colorGroup || "",
+            colorLabel: productData.colorLabel || "",
+            active: productData.active ?? true,
+            isCombo: productData.isCombo ?? false,
+            comboTopSizes: Object.entries(productData.comboTopSizes || {}).map(([size, stock]) => ({ size, stock })),
+            comboBottomSizes: Object.entries(productData.comboBottomSizes || {}).map(([size, stock]) => ({ size, stock }))
           });
         }
       } catch (err) {
@@ -117,7 +129,7 @@ export default function AdminProductForm({ mode = "edit" }) {
   };
 
   const addVariant = () => {
-    setForm((prev) => ({ ...prev, variants: [...prev.variants, { size: "", stock: 0 }] }));
+    setForm((prev) => ({ ...prev, variants: [...prev.variants, { size: "", color: "Default", stock: 0 }] }));
   };
 
   const updateVariant = (index, field, value) => {
@@ -136,6 +148,26 @@ export default function AdminProductForm({ mode = "edit" }) {
     });
   };
 
+  const addComboSize = (type) => {
+    setForm((prev) => ({ ...prev, [type]: [...prev[type], { size: "", stock: 0 }] }));
+  };
+
+  const updateComboSize = (type, index, field, value) => {
+    setForm((prev) => {
+      const newSizes = [...prev[type]];
+      newSizes[index] = { ...newSizes[index], [field]: value };
+      return { ...prev, [type]: newSizes };
+    });
+  };
+
+  const removeComboSize = (type, index) => {
+    setForm((prev) => {
+      const newSizes = [...prev[type]];
+      newSizes.splice(index, 1);
+      return { ...prev, [type]: newSizes };
+    });
+  };
+
   const fillPattern = (pattern) => {
     let sizes = [];
     if (pattern === "letters") sizes = ["S", "M", "L", "XL", "XXL", "3XL"];
@@ -144,7 +176,7 @@ export default function AdminProductForm({ mode = "edit" }) {
     
     setForm((prev) => ({
       ...prev,
-      variants: sizes.map((size) => ({ size, stock: 0 }))
+      variants: sizes.map((size) => ({ size, color: "Default", stock: 0 }))
     }));
   };
 
@@ -160,10 +192,24 @@ export default function AdminProductForm({ mode = "edit" }) {
       return;
     }
 
-    if (form.variants.some(v => !v.size.trim())) {
+    if (!form.isCombo && form.variants.some(v => !v.size.trim())) {
       setStatus((prev) => ({ ...prev, saving: false, error: "All size variants must have a name." }));
       return;
     }
+
+    if (form.isCombo && (form.comboTopSizes.length === 0 || form.comboBottomSizes.length === 0)) {
+      setStatus((prev) => ({ ...prev, saving: false, error: "Combos require at least one top and bottom size." }));
+      return;
+    }
+
+    const topSizesObj = {};
+    form.comboTopSizes.forEach(v => { 
+      if (v.size.trim()) topSizesObj[v.size.trim()] = Number(v.stock) || 0; 
+    });
+    const bottomSizesObj = {};
+    form.comboBottomSizes.forEach(v => { 
+      if (v.size.trim()) bottomSizesObj[v.size.trim()] = Number(v.stock) || 0; 
+    });
 
     const basePayload = {
       title: form.title.trim(),
@@ -172,7 +218,13 @@ export default function AdminProductForm({ mode = "edit" }) {
       compareAtPrice: form.compareAtPrice ? Number(form.compareAtPrice) : null,
       variants: form.variants,
       active: Boolean(form.active),
-      categoryId: form.categoryId ? Number(form.categoryId) : undefined
+      categoryId: form.categoryId ? Number(form.categoryId) : undefined,
+      instagramLink: form.instagramLink ? form.instagramLink.trim() : null,
+      colorGroup: form.colorGroup ? form.colorGroup.trim() : null,
+      colorLabel: form.colorLabel ? form.colorLabel.trim() : null,
+      isCombo: Boolean(form.isCombo),
+      comboTopSizes: form.isCombo ? topSizesObj : null,
+      comboBottomSizes: form.isCombo ? bottomSizesObj : null
     };
 
     try {
@@ -325,6 +377,38 @@ export default function AdminProductForm({ mode = "edit" }) {
               </div>
 
               <div className="space-y-2">
+                <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 px-1">Instagram Post URL (Optional)</label>
+                <input 
+                  className="w-full px-6 py-4 rounded-2xl border border-slate-200 focus:outline-none focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all font-medium text-lg text-slate-800"
+                  placeholder="https://www.instagram.com/p/..."
+                  value={form.instagramLink} 
+                  onChange={updateField("instagramLink")} 
+                />
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 px-1">Color Group ID (for linking)</label>
+                  <input 
+                    className="w-full px-6 py-4 rounded-2xl border border-slate-200 focus:outline-none focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all font-medium text-slate-800"
+                    placeholder="e.g. polo-shirt"
+                    value={form.colorGroup} 
+                    onChange={updateField("colorGroup")} 
+                  />
+                  <p className="text-[9px] text-slate-400 font-bold px-1">Products with the same group ID appear as color swatches on each other's page.</p>
+                </div>
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 px-1">This Product's Color Label</label>
+                  <input 
+                    className="w-full px-6 py-4 rounded-2xl border border-slate-200 focus:outline-none focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all font-medium text-slate-800"
+                    placeholder="e.g. Navy Blue"
+                    value={form.colorLabel} 
+                    onChange={updateField("colorLabel")} 
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-2">
                 <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 px-1">Story & Details</label>
                 <textarea 
                   rows={8}
@@ -359,54 +443,147 @@ export default function AdminProductForm({ mode = "edit" }) {
                  </div>
                </div>
                
-               <div className="flex flex-wrap gap-2">
-                 <button type="button" onClick={() => fillPattern('letters')} className="px-3 py-1.5 rounded-xl border border-white/10 text-white/60 text-[10px] font-black uppercase tracking-widest hover:border-white/30 hover:text-white transition-all">S-3XL</button>
-                 <button type="button" onClick={() => fillPattern('waist')} className="px-3 py-1.5 rounded-xl border border-white/10 text-white/60 text-[10px] font-black uppercase tracking-widest hover:border-white/30 hover:text-white transition-all">28-40</button>
-                 <button type="button" onClick={() => fillPattern('large')} className="px-3 py-1.5 rounded-xl border border-white/10 text-white/60 text-[10px] font-black uppercase tracking-widest hover:border-white/30 hover:text-white transition-all">50-80</button>
+               <div className="flex items-center gap-4">
+                 <label className="flex items-center gap-3 cursor-pointer group bg-white/5 px-4 py-2 rounded-2xl border border-white/5 hover:border-white/20 transition-all">
+                   <span className="text-xs font-black uppercase tracking-widest text-indigo-300">Sell as Combo Set</span>
+                   <div className={`h-5 w-9 rounded-full relative transition-all duration-300 ${form.isCombo ? "bg-indigo-500" : "bg-slate-700"}`}>
+                     <div className={`h-3 w-3 rounded-full bg-white absolute top-1 transition-all duration-300 ${form.isCombo ? "left-5" : "left-1"}`}></div>
+                   </div>
+                   <input type="checkbox" className="hidden" checked={form.isCombo} onChange={updateField("isCombo")} />
+                 </label>
                </div>
              </div>
 
-             <div className="space-y-4">
-               {form.variants.map((v, i) => (
-                 <div key={i} className="flex items-center gap-4 bg-white/5 p-4 rounded-2xl border border-white/5 group hover:border-white/20 transition-all">
-                   <div className="flex-1 space-y-2">
-                     <label className="text-[11px] font-black text-indigo-400 uppercase tracking-widest px-1">Size Tag</label>
-                     <input 
-                       className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2 text-white font-black text-sm outline-none focus:border-indigo-500 transition-all"
-                       placeholder="M, XL, 32..."
-                       value={v.size} 
-                       onChange={(e) => updateVariant(i, "size", e.target.value)} 
-                     />
+               <div className="space-y-6">
+                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8">
+                   {/* Top Sizes */}
+                   <div className="bg-slate-800/20 p-5 lg:p-6 rounded-3xl border border-slate-700/50 shadow-inner space-y-5">
+                     <div className="flex items-center justify-between mb-2">
+                       <h3 className="text-sm font-black text-indigo-300 uppercase tracking-widest">Top / Shirt Sizes</h3>
+                       <button type="button" onClick={() => addComboSize("comboTopSizes")} className="h-9 w-9 rounded-full bg-indigo-600/20 text-indigo-400 flex items-center justify-center hover:bg-indigo-600 hover:text-white transition-all shadow-lg hover:scale-105 flex-shrink-0">
+                         <Plus size={16} strokeWidth={3} />
+                       </button>
+                     </div>
+                     <div className="space-y-3">
+                       {form.comboTopSizes.map((v, i) => (
+                         <div key={`top-${i}`} className="flex items-center gap-2 sm:gap-3 group">
+                           <input 
+                             className="min-w-0 w-full flex-1 bg-slate-900/50 border border-white/10 rounded-xl px-4 py-3 text-white font-bold text-sm outline-none focus:border-indigo-500 focus:bg-slate-900 transition-all placeholder:text-slate-500"
+                             placeholder="Size (e.g. M)"
+                             value={v.size} 
+                             onChange={(e) => updateComboSize("comboTopSizes", i, "size", e.target.value)} 
+                           />
+                           <input 
+                             type="number"
+                             className="min-w-0 w-16 sm:w-20 bg-slate-900/50 border border-white/10 rounded-xl px-2 py-3 text-white font-bold text-sm outline-none focus:border-indigo-500 focus:bg-slate-900 transition-all text-center placeholder:text-slate-500"
+                             placeholder="Qty"
+                             value={v.stock} 
+                             onChange={(e) => updateComboSize("comboTopSizes", i, "stock", Number(e.target.value))} 
+                           />
+                           <button type="button" onClick={() => removeComboSize("comboTopSizes", i)} className="p-3 text-white/30 hover:text-red-400 hover:bg-red-400/10 rounded-xl transition-all flex-shrink-0">
+                             <Trash2 size={18} />
+                           </button>
+                         </div>
+                       ))}
+                       {form.comboTopSizes.length === 0 && (
+                         <div className="text-center p-6 border border-dashed border-white/5 rounded-2xl text-[10px] text-white/30 font-black uppercase tracking-widest bg-slate-900/20">No top sizes added</div>
+                       )}
+                     </div>
                    </div>
-                   <div className="flex-1 space-y-2">
-                     <label className="text-[11px] font-black text-indigo-400 uppercase tracking-widest px-1">Units Available</label>
-                     <input 
-                       type="number"
-                       className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2 text-white font-black text-sm outline-none focus:border-indigo-500 transition-all"
-                       placeholder="0"
-                       value={v.stock} 
-                       onChange={(e) => updateVariant(i, "stock", Number(e.target.value))} 
-                     />
-                   </div>
-                   <button 
-                     type="button" 
-                     className="mt-6 p-3 rounded-xl text-white/30 hover:text-red-400 hover:bg-white/5 transition-all"
-                     onClick={() => removeVariant(i)}
-                   >
-                     <Trash2 size={18} />
-                   </button>
-                 </div>
-               ))}
 
-               <button 
-                 type="button" 
-                 onClick={addVariant}
-                 className="w-full py-4 rounded-2xl border-2 border-dashed border-white/10 text-white/40 hover:text-white hover:border-white/30 hover:bg-white/5 transition-all flex items-center justify-center gap-2 font-black text-xs uppercase tracking-widest mt-6"
-               >
-                 <Plus size={16} />
-                 <span>Append New Variant</span>
-               </button>
-             </div>
+                   {/* Bottom Sizes */}
+                   <div className="bg-slate-800/20 p-5 lg:p-6 rounded-3xl border border-slate-700/50 shadow-inner space-y-5">
+                     <div className="flex items-center justify-between mb-2">
+                       <h3 className="text-sm font-black text-indigo-300 uppercase tracking-widest">Bottom / Pant Sizes</h3>
+                       <button type="button" onClick={() => addComboSize("comboBottomSizes")} className="h-9 w-9 rounded-full bg-indigo-600/20 text-indigo-400 flex items-center justify-center hover:bg-indigo-600 hover:text-white transition-all shadow-lg hover:scale-105 flex-shrink-0">
+                         <Plus size={16} strokeWidth={3} />
+                       </button>
+                     </div>
+                     <div className="space-y-3">
+                       {form.comboBottomSizes.map((v, i) => (
+                         <div key={`bot-${i}`} className="flex items-center gap-2 sm:gap-3 group">
+                           <input 
+                             className="min-w-0 w-full flex-1 bg-slate-900/50 border border-white/10 rounded-xl px-4 py-3 text-white font-bold text-sm outline-none focus:border-indigo-500 focus:bg-slate-900 transition-all placeholder:text-slate-500"
+                             placeholder="Size (e.g. 32)"
+                             value={v.size} 
+                             onChange={(e) => updateComboSize("comboBottomSizes", i, "size", e.target.value)} 
+                           />
+                           <input 
+                             type="number"
+                             className="min-w-0 w-16 sm:w-20 bg-slate-900/50 border border-white/10 rounded-xl px-2 py-3 text-white font-bold text-sm outline-none focus:border-indigo-500 focus:bg-slate-900 transition-all text-center placeholder:text-slate-500"
+                             placeholder="Qty"
+                             value={v.stock} 
+                             onChange={(e) => updateComboSize("comboBottomSizes", i, "stock", Number(e.target.value))} 
+                           />
+                           <button type="button" onClick={() => removeComboSize("comboBottomSizes", i)} className="p-3 text-white/30 hover:text-red-400 hover:bg-red-400/10 rounded-xl transition-all flex-shrink-0">
+                             <Trash2 size={18} />
+                           </button>
+                         </div>
+                       ))}
+                       {form.comboBottomSizes.length === 0 && (
+                         <div className="text-center p-6 border border-dashed border-white/5 rounded-2xl text-[10px] text-white/30 font-black uppercase tracking-widest bg-slate-900/20">No bottom sizes added</div>
+                       )}
+                     </div>
+                   </div>
+                 </div>
+               </div>
+             ) : (
+               <>
+                 <div className="flex flex-wrap gap-2 mb-6">
+                   <button type="button" onClick={() => fillPattern('letters')} className="px-3 py-1.5 rounded-xl border border-white/10 text-white/60 text-[10px] font-black uppercase tracking-widest hover:border-white/30 hover:text-white transition-all">S-3XL</button>
+                   <button type="button" onClick={() => fillPattern('waist')} className="px-3 py-1.5 rounded-xl border border-white/10 text-white/60 text-[10px] font-black uppercase tracking-widest hover:border-white/30 hover:text-white transition-all">28-40</button>
+                   <button type="button" onClick={() => fillPattern('large')} className="px-3 py-1.5 rounded-xl border border-white/10 text-white/60 text-[10px] font-black uppercase tracking-widest hover:border-white/30 hover:text-white transition-all">50-80</button>
+                 </div>
+
+                 <div className="space-y-4">
+                   {form.variants.map((v, i) => (
+                     <div key={i} className="flex items-center gap-4 bg-white/5 p-4 rounded-2xl border border-white/5 group hover:border-white/20 transition-all">
+                       <div className="flex-1 space-y-2">
+                         <label className="text-[11px] font-black text-indigo-400 uppercase tracking-widest px-1">Size Tag</label>
+                         <input 
+                           className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2 text-white font-black text-sm outline-none focus:border-indigo-500 transition-all"
+                           placeholder="M, XL, 32..."
+                           value={v.size} 
+                           onChange={(e) => updateVariant(i, "size", e.target.value)} 
+                         />
+                       </div>
+                       <div className="flex-1 space-y-2">
+                         <label className="text-[11px] font-black text-indigo-400 uppercase tracking-widest px-1">Color / Variant Name</label>
+                         <input 
+                           className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2 text-white font-black text-sm outline-none focus:border-indigo-500 transition-all"
+                           placeholder="Navy, Matte Black..."
+                           value={v.color} 
+                           onChange={(e) => updateVariant(i, "color", e.target.value)} 
+                         />
+                       </div>
+                       <div className="w-24 space-y-2">
+                         <label className="text-[11px] font-black text-indigo-400 uppercase tracking-widest px-1">Stock</label>
+                         <input 
+                           type="number"
+                           className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2 text-white font-black text-sm outline-none focus:border-indigo-500 transition-all text-center"
+                           value={v.stock} 
+                           onChange={(e) => updateVariant(i, "stock", Number(e.target.value))} 
+                         />
+                       </div>
+                       <div className="pt-6">
+                         <button type="button" onClick={() => removeVariant(i)} className="p-2.5 rounded-xl bg-white/5 text-white/30 hover:text-red-400 hover:bg-white/10 transition-all">
+                           <Trash2 size={16} />
+                         </button>
+                       </div>
+                     </div>
+                   ))}
+                 </div>
+
+                 <button 
+                   type="button" 
+                   onClick={addVariant}
+                   className="w-full py-4 rounded-2xl border-2 border-dashed border-white/10 text-white/40 hover:text-white hover:border-white/30 hover:bg-white/5 transition-all flex items-center justify-center gap-2 font-black text-xs uppercase tracking-widest mt-6"
+                 >
+                   <Plus size={16} />
+                   <span>Append New Variant</span>
+                 </button>
+               </>
+             )}
           </section>
         </div>
 

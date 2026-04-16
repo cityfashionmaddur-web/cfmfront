@@ -32,6 +32,7 @@ import AdminCategories from "./pages/admin/AdminCategories.jsx";
 import AdminCategoryDetail from "./pages/admin/AdminCategoryDetail.jsx";
 import AdminHero from "./pages/admin/AdminHero.jsx";
 import AdminHeroForm from "./pages/admin/AdminHeroForm.jsx";
+import AdminCollections from "./pages/admin/AdminCollections.jsx";
 import AdminNotFound from "./pages/admin/AdminNotFound.jsx";
 
 export default function App() {
@@ -70,6 +71,7 @@ export default function App() {
           <Route path="customers/:id" element={<AdminCustomerDetail />} />
           <Route path="categories" element={<AdminCategories />} />
           <Route path="categories/:id" element={<AdminCategoryDetail />} />
+          <Route path="collections" element={<AdminCollections />} />
           <Route path="hero" element={<AdminHero />} />
           <Route path="hero/new" element={<AdminHeroForm mode="create" />} />
           <Route path="hero/:id" element={<AdminHeroForm />} />

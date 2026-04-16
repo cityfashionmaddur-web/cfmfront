@@ -1,8 +1,9 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link, useParams, useNavigate } from "react-router-dom";
 import { apiGet } from "../utils/api.js";
 import { formatPrice } from "../utils/format.js";
 import { useCart } from "../context/CartContext.jsx";
+import { useAuth } from "../context/AuthContext.jsx";
 import ProductCard from "../components/ProductCard.jsx";
 
 const ChevronDown = () => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="square" strokeLinejoin="miter"><path d="m6 9 6 6 6-6"/></svg>;
@@ -18,7 +19,9 @@ const ShareIcon = () => (
 
 export default function ProductDetail() {
   const { slug } = useParams();
+  const navigate = useNavigate();
   const { addItem, openDrawer } = useCart();
+  const { isAuthenticated } = useAuth();
   const [product, setProduct] = useState(null);
   const [related, setRelated] = useState([]);
   const [quantity, setQuantity] = useState(1);
@@ -27,6 +30,8 @@ export default function ProductDetail() {
 
   const [openSection, setOpenSection] = useState("details");
   const [selectedSize, setSelectedSize] = useState("");
+  const [selectedBottomSize, setSelectedBottomSize] = useState("");
+  const [selectedColor, setSelectedColor] = useState("");
 
   useEffect(() => {
     let active = true;
@@ -37,13 +42,9 @@ export default function ProductDetail() {
       try {
         const productResponse = await apiGet(`/store/products/${slug}`);
         if (!active) return;
-        setProduct(productResponse);
-
-        if (productResponse?.id) {
-          const relatedResponse = await apiGet(`/store/products/related/${productResponse.id}`).catch(() => []);
-          if (!active) return;
-          setRelated(relatedResponse || []);
-        }
+        const { related: relatedProducts, ...productData } = productResponse;
+        setProduct(productData);
+        setRelated(relatedProducts || []);
       } catch (err) {
         if (!active) return;
         setError(err.message || "Failed to load product.");
@@ -61,28 +62,90 @@ export default function ProductDetail() {
     [product]
   );
 
-  const hasVariants = product?.variants && product.variants.length > 0;
-  
-  const inStock = hasVariants
-    ? (selectedSize 
-       ? product.variants.find(v => v.size === selectedSize)?.stock > 0 
-       : product.variants.some(v => v.stock > 0))
-    : (product?.stock === undefined || product?.stock > 0);
+  const hasVariants = !product?.isCombo && product?.variants && product.variants.length > 0;
+  const uniqueSizes = useMemo(() => Array.from(new Set(product?.variants?.map(v => v.size) || [])), [product]);
+  const availableColors = useMemo(() => product?.variants?.filter(v => v.size === selectedSize) || [], [product, selectedSize]);
+
+  const comboTopSizesList = useMemo(() => product?.comboTopSizes ? Object.keys(product.comboTopSizes) : [], [product]);
+  const comboBottomSizesList = useMemo(() => product?.comboBottomSizes ? Object.keys(product.comboBottomSizes) : [], [product]);
+
+  // When size changes, clear color or auto-select if only one
+  useEffect(() => {
+    if (selectedSize) {
+      const colorsForSize = product.variants.filter(v => v.size === selectedSize);
+      if (colorsForSize.length === 1) {
+        setSelectedColor(colorsForSize[0].color);
+      } else {
+        setSelectedColor("");
+      }
+    }
+  }, [selectedSize, product]);
+
+  const activeVariant = hasVariants && selectedSize && selectedColor 
+    ? product.variants.find(v => v.size === selectedSize && v.color === selectedColor) 
+    : null;
+
+  const isComboInStock = useMemo(() => {
+    if (!product?.isCombo) return false;
+    const topStock = Object.values(product.comboTopSizes || {}).some(s => s > 0);
+    const bottomStock = Object.values(product.comboBottomSizes || {}).some(s => s > 0);
+    return topStock && bottomStock;
+  }, [product]);
+
+  const inStock = product?.isCombo 
+    ? isComboInStock
+    : hasVariants
+      ? (activeVariant 
+         ? activeVariant.stock > 0 
+         : product.variants.some(v => v.stock > 0))
+      : (product?.stock === undefined || product?.stock > 0);
 
   const getStockCount = () => {
-    if (hasVariants && selectedSize) {
-      return product.variants.find(v => v.size === selectedSize)?.stock || 0;
+    if (product?.isCombo) {
+      if (selectedSize && selectedBottomSize) {
+        return Math.min(
+          product.comboTopSizes[selectedSize] || 0,
+          product.comboBottomSizes[selectedBottomSize] || 0
+        );
+      }
+      return 1; 
     }
+    if (activeVariant) return activeVariant.stock;
     return product?.stock || 0;
   };
 
   const handleAdd = () => {
     if (!product) return;
-    if (hasVariants && !selectedSize) {
-      alert("Please select a size before adding to cart.");
+    if (!isAuthenticated) {
+      navigate(`/login?returnTo=/products/${product.slug}`);
       return;
     }
-    const success = addItem(product, Number(quantity) || 1, selectedSize);
+    if (product.isCombo) {
+      if (!selectedSize) {
+        alert("Please select a Top/Shirt size.");
+        return;
+      }
+      if (!selectedBottomSize) {
+        alert("Please select a Bottom/Pant size.");
+        return;
+      }
+      const combinedSize = `${selectedSize} Top | ${selectedBottomSize} Bottom`;
+      const success = addItem(product, Number(quantity) || 1, combinedSize, "Default");
+      if (success) openDrawer();
+      return;
+    }
+
+    if (hasVariants) {
+      if (!selectedSize) {
+        alert("Please select a size.");
+        return;
+      }
+      if (!selectedColor) {
+        alert("Please select a color.");
+        return;
+      }
+    }
+    const success = addItem(product, Number(quantity) || 1, selectedSize, selectedColor);
     if (success) openDrawer();
   };
 
@@ -178,9 +241,18 @@ export default function ProductDetail() {
 
               <div className="space-y-4">
                 <div className="flex items-start justify-between gap-4">
-                  <h1 className="text-3xl lg:text-5xl font-heading font-black uppercase tracking-tighter text-ink leading-none">
-                    {product.title}
-                  </h1>
+                  <div className="flex items-center gap-4">
+                    <h1 className="text-3xl lg:text-5xl font-heading font-black uppercase tracking-tighter text-ink leading-none">
+                      {product.title}
+                    </h1>
+                    {product.instagramLink && (
+                      <a href={product.instagramLink} target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-pink-600 transition-colors" title="View on Instagram" aria-label="View on Instagram">
+                        <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                          <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
+                        </svg>
+                      </a>
+                    )}
+                  </div>
                   <button onClick={handleShare} className="text-gray-400 hover:text-ink transition-colors p-2 -mt-2 -mr-2" aria-label="Share Piece" title="Share Piece">
                     <ShareIcon />
                   </button>
@@ -202,40 +274,174 @@ export default function ProductDetail() {
                 </div>
               </div>
 
+              {/* Color Siblings — linked product swatches */}
+              {product.colorGroup && (product.colorSiblings?.length > 0 || product.colorLabel) && (
+                <div className="space-y-3">
+                  <span className="text-[10px] font-black uppercase tracking-widest text-ink">Available Colors</span>
+                  <div className="flex flex-wrap gap-3 items-center">
+                    {/* Current product — active state */}
+                    {product.colorLabel && (
+                      <div className="px-5 h-10 border-2 border-ink bg-ink text-white text-[10px] font-black uppercase tracking-widest flex items-center gap-2 shadow-lg">
+                        {product.productImages?.[0]?.url && (
+                          <img src={product.productImages[0].url} alt="" className="w-5 h-5 object-cover rounded-sm" />
+                        )}
+                        {product.colorLabel}
+                      </div>
+                    )}
+                    {/* Sibling products — navigate on click */}
+                    {(product.colorSiblings || []).map((sibling) => (
+                      <Link
+                        key={sibling.id}
+                        to={`/products/${sibling.slug}`}
+                        className="px-5 h-10 border border-gray-200 bg-transparent text-ink text-[10px] font-bold uppercase tracking-widest flex items-center gap-2 hover:border-ink transition-all duration-200"
+                      >
+                        {sibling.productImages?.[0]?.url && (
+                          <img src={sibling.productImages[0].url} alt="" className="w-5 h-5 object-cover rounded-sm" />
+                        )}
+                        {sibling.colorLabel || 'Variant'}
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+              )}
+
               <p className="text-sm text-gray-500 leading-relaxed max-w-md">
                 {product.description || "A curated piece blending stark minimalism with functional utility. Perfect for transitioning seasons."}
               </p>
 
               <div className="pt-6 border-t border-gray-100 space-y-8">
                 
+                {product.isCombo && (
+                  <div className="space-y-12 lg:space-y-14 py-4">
+                    {/* Top Size */}
+                    <div className="space-y-6">
+                      <div className="flex justify-between items-end border-b border-gray-200 pb-4">
+                        <div className="flex items-center gap-3">
+                          <span className="w-5 h-5 rounded-full bg-ink text-white flex items-center justify-center text-[9px] font-black">1</span>
+                          <span className="text-[11px] font-black uppercase tracking-[0.2em] text-ink">Select Top Dimension</span>
+                        </div>
+                        <button className="text-[9px] font-bold uppercase tracking-widest text-gray-400 hover:text-ink transition-colors pb-0.5 border-b border-transparent hover:border-ink">Fit Guide</button>
+                      </div>
+                      <div className="flex flex-wrap gap-3 sm:gap-4">
+                        {comboTopSizesList.map((size) => {
+                           const isSelected = selectedSize === size;
+                           const isOutOfStock = (product.comboTopSizes[size] || 0) === 0;
+                           return (
+                             <button
+                               key={`top-${size}`}
+                               onClick={() => !isOutOfStock && setSelectedSize(size)}
+                               disabled={isOutOfStock}
+                               className={`min-w-[4rem] sm:min-w-[4.5rem] px-4 h-14 border text-xs font-bold uppercase tracking-widest transition-all duration-300 ${
+                                 isSelected
+                                   ? 'border-ink bg-ink text-white shadow-xl scale-105'
+                                   : isOutOfStock
+                                   ? 'border-gray-100 bg-gray-50 text-gray-300 cursor-not-allowed line-through'
+                                   : 'border-gray-200 bg-transparent text-ink hover:border-ink hover:-translate-y-0.5'
+                               }`}
+                             >
+                               {size}
+                             </button>
+                           )
+                        })}
+                      </div>
+                    </div>
+                    
+                    {/* Bottom Size */}
+                    <div className="space-y-6">
+                      <div className="flex justify-between items-end border-b border-gray-200 pb-4">
+                        <div className="flex items-center gap-3">
+                          <span className="w-5 h-5 rounded-full bg-ink text-white flex items-center justify-center text-[9px] font-black">2</span>
+                          <span className="text-[11px] font-black uppercase tracking-[0.2em] text-ink">Select Bottom Dimension</span>
+                        </div>
+                      </div>
+                      <div className="flex flex-wrap gap-3 sm:gap-4">
+                        {comboBottomSizesList.map((size) => {
+                           const isSelected = selectedBottomSize === size;
+                           const isOutOfStock = (product.comboBottomSizes[size] || 0) === 0;
+                           return (
+                             <button
+                               key={`bottom-${size}`}
+                               onClick={() => !isOutOfStock && setSelectedBottomSize(size)}
+                               disabled={isOutOfStock}
+                               className={`min-w-[4rem] sm:min-w-[4.5rem] px-4 h-14 border text-xs font-bold uppercase tracking-widest transition-all duration-300 ${
+                                 isSelected
+                                   ? 'border-ink bg-ink text-white shadow-xl scale-105'
+                                   : isOutOfStock
+                                   ? 'border-gray-100 bg-gray-50 text-gray-300 cursor-not-allowed line-through'
+                                   : 'border-gray-200 bg-transparent text-ink hover:border-ink hover:-translate-y-0.5'
+                               }`}
+                             >
+                               {size}
+                             </button>
+                           )
+                        })}
+                      </div>
+                    </div>
+                  </div>
+                )}
+
                 {hasVariants && (
-                  <div className="space-y-4">
-                    <div className="flex justify-between items-center">
-                      <span className="text-[10px] font-black uppercase tracking-widest text-ink">Select Dimension</span>
-                      <button className="text-[10px] font-bold uppercase tracking-widest text-gray-400 hover:text-ink transition-colors border-b border-gray-400 hover:border-ink">Fit Guide</button>
+                  <div className="space-y-6">
+                    <div className="space-y-4">
+                      <div className="flex justify-between items-center">
+                        <span className="text-[10px] font-black uppercase tracking-widest text-ink">Select Dimension</span>
+                        <button className="text-[10px] font-bold uppercase tracking-widest text-gray-400 hover:text-ink transition-colors border-b border-gray-400 hover:border-ink">Fit Guide</button>
+                      </div>
+                      <div className="flex flex-wrap gap-3">
+                        {uniqueSizes.map((size) => {
+                           const isSelected = selectedSize === size;
+                           const isAvailableAnywhere = product.variants.some(v => v.size === size && v.stock > 0);
+                           return (
+                             <button
+                               key={size}
+                               onClick={() => isAvailableAnywhere && setSelectedSize(size)}
+                               disabled={!isAvailableAnywhere}
+                               className={`min-w-[3.5rem] px-4 h-12 border text-xs font-bold uppercase tracking-widest transition-all duration-200 ${
+                                 isSelected
+                                   ? 'border-ink bg-ink text-white shadow-xl'
+                                   : !isAvailableAnywhere
+                                   ? 'border-gray-100 bg-gray-50 text-gray-300 cursor-not-allowed line-through'
+                                   : 'border-gray-200 bg-transparent text-ink hover:border-ink'
+                               }`}
+                             >
+                               {size}
+                             </button>
+                           )
+                        })}
+                      </div>
                     </div>
-                    <div className="flex flex-wrap gap-3">
-                      {product.variants.map((v) => {
-                         const isSelected = selectedSize === v.size;
-                         const isOutOfStock = v.stock === 0;
-                         return (
-                           <button
-                             key={v.size}
-                             onClick={() => !isOutOfStock && setSelectedSize(v.size)}
-                             disabled={isOutOfStock}
-                             className={`min-w-[3.5rem] h-12 border text-xs font-bold uppercase tracking-widest transition-all duration-200 ${
-                               isSelected
-                                 ? 'border-ink bg-ink text-white shadow-xl'
-                                 : isOutOfStock
-                                 ? 'border-gray-100 bg-gray-50 text-gray-300 cursor-not-allowed line-through'
-                                 : 'border-gray-200 bg-transparent text-ink hover:border-ink'
-                             }`}
-                           >
-                             {v.size}
-                           </button>
-                         )
-                      })}
-                    </div>
+
+                    {selectedSize && availableColors.length > 0 && (
+                      <div className="space-y-4 animate-in fade-in slide-in-from-bottom-2 duration-300">
+                        <div className="flex justify-between items-center">
+                          <span className="text-[10px] font-black uppercase tracking-widest text-ink">Select Color</span>
+                        </div>
+                        <div className="flex flex-wrap gap-3">
+                          {availableColors.map((v) => {
+                             const isSelected = selectedColor === v.color;
+                             const isOutOfStock = v.stock === 0;
+                             // Display logic to handle empty/Default cleanly
+                             const displayLabel = v.color === 'Default' || v.color === '' ? 'Standard' : v.color;
+                             return (
+                               <button
+                                 key={v.id || v.color}
+                                 onClick={() => !isOutOfStock && setSelectedColor(v.color)}
+                                 disabled={isOutOfStock}
+                                 className={`px-6 h-12 border text-xs font-bold uppercase tracking-widest transition-all duration-200 ${
+                                   isSelected
+                                     ? 'border-ink bg-ink text-white shadow-xl'
+                                     : isOutOfStock
+                                     ? 'border-gray-100 bg-gray-50 text-gray-300 cursor-not-allowed line-through'
+                                     : 'border-gray-200 bg-transparent text-ink hover:border-ink'
+                                 }`}
+                               >
+                                 {displayLabel}
+                               </button>
+                             )
+                          })}
+                        </div>
+                      </div>
+                    )}
                   </div>
                 )}
 

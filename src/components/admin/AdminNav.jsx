@@ -6,6 +6,7 @@ import {
   ShoppingBag, 
   Users, 
   Layers, 
+  FolderOpen,
   Image as ImageIcon 
 } from "lucide-react";
 
@@ -14,6 +15,7 @@ const navItems = [
   { to: "/admin/products", label: "Products", Icon: Package },
   { to: "/admin/orders", label: "Orders", Icon: ShoppingBag },
   { to: "/admin/customers", label: "Customers", Icon: Users },
+  { to: "/admin/collections", label: "Collections", Icon: FolderOpen },
   { to: "/admin/categories", label: "Categories", Icon: Layers },
   { to: "/admin/hero", label: "Hero Slides", Icon: ImageIcon }
 ];

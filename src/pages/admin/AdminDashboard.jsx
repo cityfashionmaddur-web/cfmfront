@@ -15,6 +15,7 @@ import {
   ChevronRight,
   PlusCircle,
   Settings,
+  FolderOpen,
   List
 } from "lucide-react";
 
@@ -240,6 +241,13 @@ export default function AdminDashboard() {
               desc="Organize tags" 
               icon={List} 
               color="bg-blue-50 text-blue-600" 
+            />
+            <QuickActionCard 
+              to="/admin/collections" 
+              title="Collections" 
+              desc="Navbar groups" 
+              icon={FolderOpen} 
+              color="bg-amber-50 text-amber-600" 
             />
             <QuickActionCard 
               to="/admin/hero" 
