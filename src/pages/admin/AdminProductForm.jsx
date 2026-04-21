@@ -95,7 +95,8 @@ export default function AdminProductForm({ mode = "edit" }) {
   }, [id, isEdit]);
 
   const updateField = (field) => (event) => {
-    const value = field === "active" ? event.target.checked : event.target.value;
+    const isCheckbox = event.target.type === "checkbox";
+    const value = isCheckbox ? event.target.checked : event.target.value;
     setForm((prev) => ({ ...prev, [field]: value }));
   };
 

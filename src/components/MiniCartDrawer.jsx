@@ -70,7 +70,7 @@ export default function MiniCartDrawer() {
           ) : (
             <div className="space-y-6">
               {items.map((item) => (
-                <div key={item.id} className="flex gap-4">
+                <div key={item.cartItemId} className="flex gap-4">
                   <div className="h-28 w-24 flex-shrink-0 bg-gray-50 aspect-[3/4]">
                     {item.image ? (
                       <img src={item.image} alt={item.title} className="h-full w-full object-cover" />
@@ -91,6 +91,11 @@ export default function MiniCartDrawer() {
                         </Link>
                         <p className="text-sm font-medium text-ink whitespace-nowrap">{formatPrice(item.price)}</p>
                       </div>
+                      <div className="mt-2 text-[10px] font-bold uppercase tracking-widest text-gray-500 flex flex-wrap gap-2">
+                        {item.size && <span>{item.size}</span>}
+                        {item.size && item.color && item.color !== 'Default' && item.color !== '' && <span>•</span>}
+                        {item.color && item.color !== 'Default' && item.color !== '' && <span>{item.color}</span>}
+                      </div>
                     </div>
 
                     <div className="flex items-center justify-between mt-4">
@@ -98,21 +103,21 @@ export default function MiniCartDrawer() {
                       <div className="flex items-center border border-gray-200">
                         <button
                           className="px-3 py-1 text-ink hover:bg-gray-50 transition-colors"
-                          onClick={() => updateQuantity(item.id, Math.max(1, (item.quantity || 1) - 1))}
+                          onClick={() => updateQuantity(item.cartItemId, Math.max(1, (item.quantity || 1) - 1))}
                         >
                           −
                         </button>
                         <span className="w-8 text-center text-xs font-bold">{item.quantity || 1}</span>
                         <button
                           className="px-3 py-1 text-ink hover:bg-gray-50 transition-colors"
-                          onClick={() => updateQuantity(item.id, (item.quantity || 1) + 1)}
+                          onClick={() => updateQuantity(item.cartItemId, (item.quantity || 1) + 1)}
                         >
                           +
                         </button>
                       </div>
                       
                       <button
-                        onClick={() => removeItem(item.id)}
+                        onClick={() => removeItem(item.cartItemId)}
                         className="text-[10px] font-bold uppercase tracking-widest text-gray-400 hover:text-red-500 underline underline-offset-4"
                       >
                         Remove
