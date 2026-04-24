@@ -412,6 +412,16 @@ export default function AdminProductForm({ mode = "edit" }) {
                 </div>
               </div>
 
+              <div className="space-y-2 mt-4">
+                <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 px-1">Available Colors (Optional, Comma Separated)</label>
+                <input 
+                  className="w-full px-6 py-4 rounded-2xl border border-slate-200 focus:outline-none focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all font-medium text-slate-800"
+                  placeholder="e.g. Green, Blue, Red"
+                  value={form.availableColors} 
+                  onChange={updateField("availableColors")} 
+                />
+              </div>
+
               <div className="space-y-2">
                 <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 px-1">Story & Details</label>
                 <textarea 
