@@ -140,12 +140,8 @@ export default function ProductDetail() {
         alert("Please select a size.");
         return;
       }
-      if (!selectedColor) {
-        alert("Please select a color.");
-        return;
-      }
     }
-    const success = addItem(product, Number(quantity) || 1, selectedSize, selectedColor);
+    const success = addItem(product, Number(quantity) || 1, selectedSize);
     if (success) openDrawer();
   };
 
