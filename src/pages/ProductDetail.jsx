@@ -274,6 +274,19 @@ export default function ProductDetail() {
                 </div>
               </div>
 
+              {product.availableColors && (
+                <div className="space-y-3">
+                  <span className="text-[10px] font-black uppercase tracking-widest text-ink">Color Variants</span>
+                  <div className="inline-flex border border-gray-200 bg-white shadow-sm">
+                    {product.availableColors.split(",").map((c, i) => (
+                      <div key={i} className={`px-6 h-10 text-ink text-[10px] font-black uppercase tracking-widest flex items-center justify-center ${i !== 0 ? 'border-l border-gray-200' : ''}`}>
+                        {c.trim()}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
               {/* Color Siblings — linked product swatches */}
               {product.colorGroup && (product.colorSiblings?.length > 0 || product.colorLabel) && (
                 <div className="space-y-3">

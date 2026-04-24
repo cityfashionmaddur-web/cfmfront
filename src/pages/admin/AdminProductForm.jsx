@@ -27,6 +27,7 @@ const emptyForm = {
   instagramLink: "",
   colorGroup: "",
   colorLabel: "",
+  availableColors: "",
   active: true,
   isCombo: false,
   comboTopSizes: [],
@@ -74,6 +75,7 @@ export default function AdminProductForm({ mode = "edit" }) {
             instagramLink: productData.instagramLink || "",
             colorGroup: productData.colorGroup || "",
             colorLabel: productData.colorLabel || "",
+            availableColors: productData.availableColors || "",
             active: productData.active ?? true,
             isCombo: productData.isCombo ?? false,
             comboTopSizes: Object.entries(productData.comboTopSizes || {}).map(([size, stock]) => ({ size, stock })),
@@ -223,6 +225,7 @@ export default function AdminProductForm({ mode = "edit" }) {
       instagramLink: form.instagramLink ? form.instagramLink.trim() : null,
       colorGroup: form.colorGroup ? form.colorGroup.trim() : null,
       colorLabel: form.colorLabel ? form.colorLabel.trim() : null,
+      availableColors: form.availableColors ? form.availableColors.trim() : null,
       isCombo: Boolean(form.isCombo),
       comboTopSizes: form.isCombo ? topSizesObj : null,
       comboBottomSizes: form.isCombo ? bottomSizesObj : null
@@ -455,6 +458,8 @@ export default function AdminProductForm({ mode = "edit" }) {
                </div>
              </div>
 
+             {form.isCombo ? (
+
                <div className="space-y-6">
                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8">
                    {/* Top Sizes */}
@@ -546,15 +551,6 @@ export default function AdminProductForm({ mode = "edit" }) {
                            placeholder="M, XL, 32..."
                            value={v.size} 
                            onChange={(e) => updateVariant(i, "size", e.target.value)} 
-                         />
-                       </div>
-                       <div className="flex-1 space-y-2">
-                         <label className="text-[11px] font-black text-indigo-400 uppercase tracking-widest px-1">Color / Variant Name</label>
-                         <input 
-                           className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2 text-white font-black text-sm outline-none focus:border-indigo-500 transition-all"
-                           placeholder="Navy, Matte Black..."
-                           value={v.color} 
-                           onChange={(e) => updateVariant(i, "color", e.target.value)} 
                          />
                        </div>
                        <div className="w-24 space-y-2">

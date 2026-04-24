@@ -164,15 +164,18 @@ export default function AdminOrderDetail() {
                     <p className="font-black text-slate-900 truncate">{item.product?.title || "Legacy Product Item"}</p>
                     <div className="flex items-center gap-3 mt-1 text-xs font-bold uppercase tracking-widest text-slate-400">
                       <span>{item.size || "standard"}</span>
-                      {item.color && item.color !== 'Default' && item.color !== '' && (
-                         <>
-                           <span className="h-1 w-1 rounded-full bg-slate-200"></span>
-                           <span>{item.color}</span>
-                         </>
-                      )}
                       <span className="h-1 w-1 rounded-full bg-slate-200"></span>
                       <span>Qty {item.quantity}</span>
                     </div>
+                    {item.product?.availableColors && (
+                      <div className="mt-3 inline-flex bg-white shadow-sm border border-slate-200 rounded-lg overflow-hidden">
+                        {item.product.availableColors.split(",").map((c, i) => (
+                          <div key={i} className={`px-3 py-1.5 text-slate-600 text-[9px] font-black uppercase tracking-widest flex items-center justify-center ${i !== 0 ? 'border-l border-slate-200' : ''}`}>
+                            {c.trim()}
+                          </div>
+                        ))}
+                      </div>
+                    )}
                   </div>
                   <div className="text-right">
                     <p className="font-black text-slate-900">{formatPrice(item.price * item.quantity)}</p>

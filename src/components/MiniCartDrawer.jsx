@@ -93,8 +93,6 @@ export default function MiniCartDrawer() {
                       </div>
                       <div className="mt-2 text-[10px] font-bold uppercase tracking-widest text-gray-500 flex flex-wrap gap-2">
                         {item.size && <span>{item.size}</span>}
-                        {item.size && item.color && item.color !== 'Default' && item.color !== '' && <span>•</span>}
-                        {item.color && item.color !== 'Default' && item.color !== '' && <span>{item.color}</span>}
                       </div>
                     </div>
 
@@ -134,19 +132,6 @@ export default function MiniCartDrawer() {
         {items.length > 0 && (
           <div className="border-t border-gray-100 bg-white px-6 py-6">
             <div className="space-y-4 mb-6">
-              <div className="space-y-2">
-                <div className="flex items-center justify-between text-[10px] font-black uppercase tracking-[0.2em] text-ink">
-                  <span>{freeShipRemaining === 0 ? "Free Shipping Unlocked" : "Progress to Free Shipping"}</span>
-                  <span className="text-gray-500">{freeShipRemaining === 0 ? "₹0 Left" : `${formatPrice(freeShipRemaining)} Away`}</span>
-                </div>
-                <div className="h-1 w-full bg-gray-100">
-                  <div
-                    className="h-1 bg-ink transition-all duration-500 ease-out"
-                    style={{ width: `${freeShipProgress}%` }}
-                  />
-                </div>
-              </div>
-
               <div className="space-y-2 text-sm pt-2">
                 <div className="flex justify-between text-gray-500">
                   <span>Subtotal</span>
