@@ -11,26 +11,6 @@ const SORT_OPTIONS = [
   { value: "price_desc", label: "Price: High to Low" }
 ];
 
-const fallbackSlides = [
-  {
-    badge: "The Lookbook",
-    title: "Editorial Edge",
-    subtitle: "High contrast silhouettes and modern minimalism.",
-    image: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?auto=format&fit=crop&w=1400&q=80",
-    caption: "Chapter 01",
-    tags: ["Monochrome", "Structured"],
-    ctas: [{ label: "Explore Collection", href: "/products?sort=newest", variant: "primary" }]
-  },
-  {
-    badge: "New Arrivals",
-    title: "Abstract Forms",
-    subtitle: "Fluid drapery meets sharp tailoring.",
-    image: "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=1400&q=80",
-    caption: "Chapter 02",
-    tags: ["Tailored", "Flow"],
-    ctas: [{ label: "Shop The Pieces", href: "/products?sort=price_desc", variant: "primary" }]
-  }
-];
 
 function mapHeroSlides(slides = []) {
   return slides
@@ -58,7 +38,7 @@ export default function Home() {
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
   const [pages, setPages] = useState(1);
-  const [slides, setSlides] = useState(fallbackSlides);
+  const [slides, setSlides] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
@@ -85,7 +65,7 @@ export default function Home() {
         setPages(Math.max(productsResponse.pages || 1, 1));
         setCategories(categoryResponse || []);
         const mappedSlides = mapHeroSlides(heroResponse || []);
-        setSlides(mappedSlides.length ? mappedSlides : fallbackSlides);
+        setSlides(mappedSlides);
       } catch (err) {
         if (!active) return;
         setError(err.message || "Failed to load storefront data.");

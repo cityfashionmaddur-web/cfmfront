@@ -64,14 +64,26 @@ export function CartProvider({ children }) {
     if (!product) return false;
     
     let stock = Infinity;
-    if (size && product.variants?.length > 0) {
-      const variant = product.variants.find(v => v.size === size && (!color || v.color === color));
+    if (product.isCombo) {
+      if (size && size.includes('|')) {
+         const [topPart, bottomPart] = size.split('|');
+         const topSize = topPart.replace('Top','').trim();
+         const bottomSize = bottomPart.replace('Bottom','').trim();
+         stock = Math.min(
+            product.comboTopSizes?.[topSize] || 0,
+            product.comboBottomSizes?.[bottomSize] || 0
+         );
+      } else { 
+         stock = 0; 
+      }
+    } else if (size && product.variants?.length > 0) {
+      const variant = product.variants.find(v => v.size === size);
       stock = variant ? variant.stock : 0;
     } else if (product.stock !== undefined) {
       stock = product.stock;
     }
 
-    const cartItemId = size || color ? `${product.id}-${size || 'nosize'}-${color || 'Default'}` : String(product.id);
+    const cartItemId = size ? `${product.id}-${size}` : String(product.id);
 
     const existing = items.find((p) => p.cartItemId === cartItemId);
     const currentQty = existing ? existing.quantity || 1 : 0;
