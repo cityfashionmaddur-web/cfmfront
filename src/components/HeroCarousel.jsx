@@ -23,7 +23,7 @@ export default function HeroCarousel({ slides = [] }) {
 
   return (
     <section
-      className="relative h-[85vh] w-full overflow-hidden bg-ink text-white"
+      className="relative h-[70vh] sm:h-[80vh] md:h-[85vh] w-full overflow-hidden bg-ink text-white"
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
     >
@@ -36,7 +36,7 @@ export default function HeroCarousel({ slides = [] }) {
           }`}
         >
           {slide.targetHref ? (
-            <Link to={slide.targetHref} className="block w-full h-full cursor-pointer">
+            <Link to={slide.targetHref} className="block w-full h-full cursor-pointer relative group">
                <img
                   src={slide.image}
                   alt={slide.title || "Latest Arrivals"}
@@ -47,18 +47,50 @@ export default function HeroCarousel({ slides = [] }) {
                   }}
                   loading={idx === 0 ? "eager" : "lazy"}
                />
+               <div className="absolute inset-0 bg-black/40 group-hover:bg-black/50 transition-colors duration-700" />
+               <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-6 md:p-12 lg:p-24 z-10">
+                 {slide.badge && <span className="text-[9px] md:text-[11px] font-black uppercase tracking-[0.3em] lg:tracking-[0.4em] text-white/90 mb-4 md:mb-6">{slide.badge}</span>}
+                 {slide.title && <h2 className="text-4xl sm:text-5xl md:text-6xl lg:text-8xl font-heading font-black text-white mb-4 lg:mb-8 tracking-tighter leading-[1.1]">{slide.title}</h2>}
+                 {slide.subtitle && <p className="text-sm md:text-base lg:text-lg text-white/90 max-w-lg md:max-w-2xl mx-auto font-medium leading-relaxed mb-8 lg:mb-12">{slide.subtitle}</p>}
+                 {slide.ctas && slide.ctas.length > 0 && (
+                   <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 w-full sm:w-auto">
+                     {slide.ctas.map((cta, i) => (
+                        <div key={i} className={`flex items-center justify-center ${cta.variant === 'primary' ? 'bg-white text-ink hover:bg-gray-100' : 'bg-transparent border border-white text-white hover:bg-white/10'} px-6 sm:px-10 py-4 font-black uppercase tracking-widest text-[10px] md:text-xs transition-all`}>
+                          {cta.label}
+                        </div>
+                     ))}
+                   </div>
+                 )}
+               </div>
             </Link>
           ) : (
-            <img
-              src={slide.image}
-              alt={slide.title || "Latest Arrivals"}
-              className="h-full w-full object-cover object-center"
-              style={{ 
-                transform: idx === active ? "scale(1.00)" : "scale(1.05)", 
-                transition: "transform 10s ease-out" 
-              }}
-              loading={idx === 0 ? "eager" : "lazy"}
-            />
+            <div className="w-full h-full relative">
+              <img
+                src={slide.image}
+                alt={slide.title || "Latest Arrivals"}
+                className="h-full w-full object-cover object-center"
+                style={{ 
+                  transform: idx === active ? "scale(1.00)" : "scale(1.05)", 
+                  transition: "transform 10s ease-out" 
+                }}
+                loading={idx === 0 ? "eager" : "lazy"}
+              />
+              <div className="absolute inset-0 bg-black/40 transition-colors duration-700" />
+              <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-6 md:p-12 lg:p-24 z-10">
+                 {slide.badge && <span className="text-[9px] md:text-[11px] font-black uppercase tracking-[0.3em] lg:tracking-[0.4em] text-white/90 mb-4 md:mb-6">{slide.badge}</span>}
+                 {slide.title && <h2 className="text-4xl sm:text-5xl md:text-6xl lg:text-8xl font-heading font-black text-white mb-4 lg:mb-8 tracking-tighter leading-[1.1]">{slide.title}</h2>}
+                 {slide.subtitle && <p className="text-sm md:text-base lg:text-lg text-white/90 max-w-lg md:max-w-2xl mx-auto font-medium leading-relaxed mb-8 lg:mb-12">{slide.subtitle}</p>}
+                 {slide.ctas && slide.ctas.length > 0 && (
+                   <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 w-full sm:w-auto">
+                     {slide.ctas.map((cta, i) => (
+                        <Link to={cta.href} key={i} className={`flex items-center justify-center ${cta.variant === 'primary' ? 'bg-white text-ink hover:bg-gray-100' : 'bg-transparent border border-white text-white hover:bg-white/10'} px-6 sm:px-10 py-4 font-black uppercase tracking-widest text-[10px] md:text-xs transition-all pointer-events-auto`}>
+                          {cta.label}
+                        </Link>
+                     ))}
+                   </div>
+                 )}
+              </div>
+            </div>
           )}
         </div>
       ))}

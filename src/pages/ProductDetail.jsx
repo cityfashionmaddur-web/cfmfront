@@ -31,6 +31,7 @@ export default function ProductDetail() {
   const [openSection, setOpenSection] = useState("details");
   const [selectedSize, setSelectedSize] = useState("");
   const [selectedBottomSize, setSelectedBottomSize] = useState("");
+  const [isDescExpanded, setIsDescExpanded] = useState(false);
   const [selectedColor, setSelectedColor] = useState("");
 
   useEffect(() => {
@@ -229,6 +230,26 @@ export default function ProductDetail() {
                 )}
               </div>
             </div>
+
+            {/* DESCRIPTION ON LEFT SIDE */}
+            <div className="mt-8 lg:mt-16 max-w-2xl pr-4 lg:pr-12">
+              <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-ink mb-4">Designer's Notes</h3>
+              <div className="text-sm text-gray-500 leading-relaxed transition-all duration-300">
+                {isDescExpanded ? (
+                  <p className="whitespace-pre-wrap">{product.description || "A curated piece blending stark minimalism with functional utility."}</p>
+                ) : (
+                  <p className="line-clamp-3 whitespace-pre-wrap">
+                    {product.description || "A curated piece blending stark minimalism with functional utility."}
+                  </p>
+                )}
+                <button 
+                  onClick={() => setIsDescExpanded(!isDescExpanded)}
+                  className="mt-6 text-[10px] font-bold uppercase tracking-widest text-ink hover:text-gray-400 border-b border-ink pb-0.5 transition-colors"
+                >
+                  {isDescExpanded ? 'Read Less' : 'Read More'}
+                </button>
+              </div>
+            </div>
           </div>
 
           {/* RIGHT: Product Info */}
@@ -313,10 +334,6 @@ export default function ProductDetail() {
                   </div>
                 </div>
               )}
-
-              <p className="text-sm text-gray-500 leading-relaxed max-w-md">
-                {product.description || "A curated piece blending stark minimalism with functional utility. Perfect for transitioning seasons."}
-              </p>
 
               <div className="pt-6 border-t border-gray-100 space-y-8">
                 
@@ -474,10 +491,10 @@ export default function ProductDetail() {
                     </div>
                   </div>
                   <div className={`text-[9px] font-black uppercase tracking-[0.2em] px-4 py-2 flex items-center gap-2 ${
-                    inStock ? 'text-green-600 bg-green-50' : 'text-red-500 bg-red-50'
+                    inStock && getStockCount() > 0 ? 'text-green-600 bg-green-50' : 'text-red-500 bg-red-50'
                   }`}>
-                     <span className={`w-1.5 h-1.5 rounded-full ${inStock ? 'bg-green-600' : 'bg-red-500'}`} />
-                     {inStock ? (getStockCount() <= 5 ? `Limited: ${getStockCount()} Remaining` : 'Available') : 'Archived'}
+                     <span className={`w-1.5 h-1.5 rounded-full ${inStock && getStockCount() > 0 ? 'bg-green-600' : 'bg-red-500'}`} />
+                     {inStock && getStockCount() > 0 ? (getStockCount() <= 5 ? `Limited: ${getStockCount()} Remaining` : 'Available') : 'Out of Stock'}
                   </div>
                 </div>
 
