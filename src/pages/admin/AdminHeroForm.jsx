@@ -108,7 +108,6 @@ export default function AdminHeroForm({ mode = "edit" }) {
 
     const payload = {
       ...form,
-      title: "Hero Slide",
       image: form.image.trim(),
       sortOrder: Number(form.sortOrder) || 0
     };
