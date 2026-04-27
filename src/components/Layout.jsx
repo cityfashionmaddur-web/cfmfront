@@ -38,7 +38,7 @@ export default function Layout({ children }) {
       <NavBar />
       <main
         id="main-content"
-        className="container mx-auto flex-1 px-4 pt-20 pb-12 sm:px-6 outline-none"
+        className="flex-1 pt-20 pb-12 outline-none"
         tabIndex={-1}
       >
         {content}
