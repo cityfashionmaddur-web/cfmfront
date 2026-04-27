@@ -100,15 +100,15 @@ export default function AdminHeroForm({ mode = "edit" }) {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-    if (!form.title.trim() || !form.image.trim()) {
-      setStatus((prev) => ({ ...prev, error: "Title and image are required." }));
+    if (!form.image.trim()) {
+      setStatus((prev) => ({ ...prev, error: "An image is required." }));
       return;
     }
     setStatus((prev) => ({ ...prev, saving: true, error: "", success: "" }));
 
     const payload = {
       ...form,
-      title: form.title.trim(),
+      title: "Hero Slide",
       image: form.image.trim(),
       sortOrder: Number(form.sortOrder) || 0
     };
@@ -183,51 +183,16 @@ export default function AdminHeroForm({ mode = "edit" }) {
           <section className="bg-white border border-slate-200 rounded-[2.5rem] p-8 shadow-sm">
             <div className="flex items-center gap-3 mb-8">
                <div className="h-10 w-10 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center">
-                 <Type size={18} strokeWidth={2.5} />
+                 <MousePointer2 size={18} strokeWidth={2.5} />
                </div>
-               <h2 className="text-xl font-black text-slate-800 tracking-tight">Messaging</h2>
+               <h2 className="text-xl font-black text-slate-800 tracking-tight">Primary Action (CTA)</h2>
             </div>
             
             <div className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-2">
-                  <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 px-1">Prominent Badge</label>
-                  <input className="w-full px-6 py-3.5 rounded-2xl border border-slate-200 focus:outline-none focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all font-bold text-slate-800" placeholder="e.g., NEW ARRIVAL" value={form.badge} onChange={updateField("badge")} />
-                </div>
-                <div className="space-y-2">
-                  <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 px-1">Visual Caption</label>
-                  <input className="w-full px-6 py-3.5 rounded-2xl border border-slate-200 focus:outline-none focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all font-bold text-slate-800" placeholder="e.g., Summer Collection 2026" value={form.caption} onChange={updateField("caption")} />
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 px-1">Primary Title</label>
-                <input className="w-full px-6 py-4 rounded-2xl border border-slate-200 focus:outline-none focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all font-black text-xl text-slate-900" placeholder="Define your headline..." value={form.title} onChange={updateField("title")} required />
-              </div>
-
-              <div className="space-y-2">
-                <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 px-1">Contextual Subtitle</label>
-                <textarea rows={3} className="w-full px-6 py-4 rounded-2xl border border-slate-200 focus:outline-none focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all font-medium text-slate-600 resize-none" placeholder="Provide more detail about this feature..." value={form.subtitle} onChange={updateField("subtitle")} />
-              </div>
-
-              <div className="pt-4 grid grid-cols-1 md:grid-cols-2 gap-8 border-t border-slate-50">
-                 <div className="space-y-4">
-                    <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-indigo-500">
-                      <MousePointer2 size={12} />
-                      <span>Primary Action (CTA)</span>
-                    </div>
-                    <input className="w-full px-4 py-3 rounded-xl border border-slate-100 bg-slate-50/50 focus:bg-white focus:outline-none focus:border-indigo-300 transition-all font-bold text-sm" placeholder="Button Label" value={form.cta1Label} onChange={updateField("cta1Label")} />
-                    <input className="w-full px-4 py-3 rounded-xl border border-slate-100 bg-slate-50/50 focus:bg-white focus:outline-none focus:border-indigo-300 transition-all font-mono text-[11px] text-slate-400" placeholder="Link (e.g., /shop)" value={form.cta1Href} onChange={updateField("cta1Href")} />
-                 </div>
-                 <div className="space-y-4 opacity-70 hover:opacity-100 transition-opacity">
-                    <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-slate-400">
-                      <LinkIcon size={12} />
-                      <span>Secondary Action</span>
-                    </div>
-                    <input className="w-full px-4 py-3 rounded-xl border border-slate-100 bg-slate-50/50 focus:bg-white focus:outline-none focus:border-slate-300 transition-all font-bold text-sm" placeholder="Label" value={form.cta2Label} onChange={updateField("cta2Label")} />
-                    <input className="w-full px-4 py-3 rounded-xl border border-slate-100 bg-slate-50/50 focus:bg-white focus:outline-none focus:border-slate-300 transition-all font-mono text-[11px] text-slate-400" placeholder="Link" value={form.cta2Href} onChange={updateField("cta1Href")} />
-                 </div>
-              </div>
+               <div className="space-y-4">
+                  <input className="w-full px-4 py-3 rounded-xl border border-slate-100 bg-slate-50/50 focus:bg-white focus:outline-none focus:border-indigo-300 transition-all font-bold text-sm" placeholder="Button Label (e.g., EXPLORE COLLECTION)" value={form.cta1Label} onChange={updateField("cta1Label")} />
+                  <input className="w-full px-4 py-3 rounded-xl border border-slate-100 bg-slate-50/50 focus:bg-white focus:outline-none focus:border-indigo-300 transition-all font-mono text-[11px] text-slate-400" placeholder="Link (e.g., /products?sort=newest)" value={form.cta1Href} onChange={updateField("cta1Href")} />
+               </div>
             </div>
           </section>
 
@@ -315,20 +280,9 @@ export default function AdminHeroForm({ mode = "edit" }) {
                   )}
                   
                   {/* Real-time Overlay Simulation */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent p-6 flex flex-col justify-end">
-                     <div className="space-y-1.5 transform translate-y-2 group-hover:translate-y-0 transition-transform duration-500">
-                        {form.badge && (
-                          <span className="inline-block px-2.5 py-1 bg-white/20 backdrop-blur-md rounded-lg text-[9px] font-black text-white uppercase tracking-widest border border-white/20 whitespace-nowrap mb-1">
-                             {form.badge}
-                          </span>
-                        )}
-                        <h4 className="text-lg font-black text-white leading-tight drop-shadow-lg">{form.title || "Headline Visualized"}</h4>
-                        <p className="text-xs text-white/70 font-bold line-clamp-2 leading-relaxed drop-shadow-md">{form.subtitle || "Supporting narrative text appears here..."}</p>
-                        
-                        <div className="flex gap-2 pt-3">
-                           {form.cta1Label && <div className="px-3 py-1.5 bg-white rounded-lg text-[8px] font-black text-black uppercase tracking-widest">{form.cta1Label}</div>}
-                           {form.cta2Label && <div className="px-3 py-1.5 bg-white/20 backdrop-blur-md rounded-lg text-[8px] font-black text-white uppercase tracking-widest border border-white/20">{form.cta2Label}</div>}
-                        </div>
+                  <div className="absolute inset-0 bg-transparent p-6 flex flex-col items-center justify-end pb-8">
+                     <div className="flex gap-2 pt-3">
+                        {form.cta1Label && <div className="px-6 py-2 bg-white rounded-lg text-[9px] font-black text-black uppercase tracking-widest shadow-xl">{form.cta1Label}</div>}
                      </div>
                   </div>
                   
