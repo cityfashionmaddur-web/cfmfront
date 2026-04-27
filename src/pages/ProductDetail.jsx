@@ -234,8 +234,8 @@ export default function ProductDetail() {
               </div>
             </div>
 
-            {/* DESCRIPTION ON LEFT SIDE */}
-            <div className="mt-8 lg:mt-16 max-w-2xl pr-4 lg:pr-12">
+            {/* DESCRIPTION ON LEFT SIDE (DESKTOP) */}
+            <div className="hidden lg:block mt-8 lg:mt-16 max-w-2xl pr-4 lg:pr-12">
               <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-ink mb-4">Designer's Notes</h3>
               <div className="text-sm text-gray-500 leading-relaxed transition-all duration-300">
                 {isDescExpanded ? (
@@ -476,6 +476,26 @@ export default function ProductDetail() {
                 >
                   {inStock ? `Acquire Piece — ${formatPrice(product.price * quantity)}` : 'Out of Stock'}
                 </button>
+              </div>
+
+              {/* DESCRIPTION ON RIGHT SIDE (MOBILE ONLY) */}
+              <div className="block lg:hidden mt-10 pt-8 border-t border-gray-100">
+                <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-ink mb-4">Designer's Notes</h3>
+                <div className="text-sm text-gray-500 leading-relaxed transition-all duration-300">
+                  {isDescExpanded ? (
+                    <p className="whitespace-pre-wrap">{product.description || "A curated piece blending stark minimalism with functional utility."}</p>
+                  ) : (
+                    <p className="line-clamp-3 whitespace-pre-wrap">
+                      {product.description || "A curated piece blending stark minimalism with functional utility."}
+                    </p>
+                  )}
+                  <button 
+                    onClick={() => setIsDescExpanded(!isDescExpanded)}
+                    className="mt-6 text-[10px] font-bold uppercase tracking-widest text-ink hover:text-gray-400 border-b border-ink pb-0.5 transition-colors"
+                  >
+                    {isDescExpanded ? 'Read Less' : 'Read More'}
+                  </button>
+                </div>
               </div>
 
               {/* Minimal Accordions */}
