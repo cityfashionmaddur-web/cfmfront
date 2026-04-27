@@ -22,11 +22,12 @@ export default function HeroCarousel({ slides = [] }) {
   if (!slides.length) return null;
 
   return (
-    <section
-      className="relative h-[70vh] sm:h-[80vh] md:h-[85vh] w-full overflow-hidden bg-ink text-white"
-      onMouseEnter={() => setIsPaused(true)}
-      onMouseLeave={() => setIsPaused(false)}
-    >
+    <div className="relative pb-8 sm:pb-0 w-full bg-white">
+      <section
+        className="relative aspect-[16/9] sm:aspect-auto sm:h-[80vh] md:h-[85vh] w-full overflow-hidden bg-gray-50 text-white"
+        onMouseEnter={() => setIsPaused(true)}
+        onMouseLeave={() => setIsPaused(false)}
+      >
       {/* Slides */}
       {slides.map((slide, idx) => (
         <div
@@ -110,24 +111,25 @@ export default function HeroCarousel({ slides = [] }) {
           </svg>
         </button>
       </div>
+      </section>
 
       {/* Minimal Progress Bar Indicators */}
-      <div className="absolute bottom-10 left-0 right-0 z-30 flex justify-center gap-4">
+      <div className="absolute bottom-2 sm:bottom-10 left-0 right-0 z-30 flex justify-center gap-4">
         {slides.map((_, idx) => (
           <button
             key={idx}
             onClick={() => setActive(idx)}
-            className="group relative h-1 w-16 overflow-hidden bg-white/20 transition-all"
+            className="group relative h-1.5 w-12 sm:h-1 sm:w-16 overflow-hidden bg-gray-300 sm:bg-white/20 transition-all"
             aria-label={`Go to slide ${idx + 1}`}
           >
             <div
-              className={`absolute inset-0 bg-white origin-left ${
+              className={`absolute inset-0 bg-ink sm:bg-white origin-left ${
                 idx === active && !isPaused ? "transition-transform duration-[7000ms] ease-linear scale-x-100" : "scale-x-0 transition-none"
               } ${idx === active && isPaused ? "scale-x-100 transition-none" : ""}`}
             />
           </button>
         ))}
       </div>
-    </section>
+    </div>
   );
 }
