@@ -111,7 +111,10 @@ export default function ProductDetail() {
       }
       return 1; 
     }
-    if (activeVariant) return activeVariant.stock;
+    if (hasVariants) {
+      if (activeVariant) return activeVariant.stock;
+      return product.variants.reduce((acc, v) => acc + v.stock, 0);
+    }
     return product?.stock || 0;
   };
 
@@ -436,38 +439,6 @@ export default function ProductDetail() {
                         })}
                       </div>
                     </div>
-
-                    {selectedSize && availableColors.length > 0 && (
-                      <div className="space-y-4 animate-in fade-in slide-in-from-bottom-2 duration-300">
-                        <div className="flex justify-between items-center">
-                          <span className="text-[10px] font-black uppercase tracking-widest text-ink">Select Color</span>
-                        </div>
-                        <div className="flex flex-wrap gap-3">
-                          {availableColors.map((v) => {
-                             const isSelected = selectedColor === v.color;
-                             const isOutOfStock = v.stock === 0;
-                             // Display logic to handle empty/Default cleanly
-                             const displayLabel = v.color === 'Default' || v.color === '' ? 'Standard' : v.color;
-                             return (
-                               <button
-                                 key={v.id || v.color}
-                                 onClick={() => !isOutOfStock && setSelectedColor(v.color)}
-                                 disabled={isOutOfStock}
-                                 className={`px-6 h-12 border text-xs font-bold uppercase tracking-widest transition-all duration-200 ${
-                                   isSelected
-                                     ? 'border-ink bg-ink text-white shadow-xl'
-                                     : isOutOfStock
-                                     ? 'border-gray-100 bg-gray-50 text-gray-300 cursor-not-allowed line-through'
-                                     : 'border-gray-200 bg-transparent text-ink hover:border-ink'
-                                 }`}
-                               >
-                                 {displayLabel}
-                               </button>
-                             )
-                          })}
-                        </div>
-                      </div>
-                    )}
                   </div>
                 )}
 

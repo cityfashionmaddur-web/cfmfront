@@ -13,7 +13,8 @@ import {
   CheckCircle2, 
   XCircle,
   Clock,
-  ChevronRight
+  ChevronRight,
+  Download
 } from "lucide-react";
 import useDebounce from "../../hooks/useDebounce.js";
 
@@ -155,12 +156,75 @@ export default function AdminOrders() {
   const nextPage = () => setPage((p) => Math.min(totalPages, p + 1));
   const prevPage = () => setPage((p) => Math.max(1, p - 1));
 
+  const handleExportExcel = async () => {
+    try {
+      setStatus((prev) => ({ ...prev, loading: true, error: "" }));
+      const query = new URLSearchParams();
+      if (filters.status) query.set("status", filters.status);
+      if (filters.from) query.set("from", filters.from);
+      if (filters.to) query.set("to", filters.to);
+      if (debouncedSearch) query.set("search", debouncedSearch);
+      query.set("page", "1");
+      query.set("pageSize", "10000");
+      
+      const res = await adminGet(`/admin/orders?${query.toString()}`);
+      const exportData = res?.data || [];
+      
+      if (!exportData.length) {
+        alert("No orders to export.");
+        return;
+      }
+
+      const headers = ["Order ID", "Date", "Status", "Total Amount", "Customer Name", "Customer Email", "Customer Phone", "Address", "Items"];
+      const rows = exportData.map(o => {
+        const date = new Date(o.createdAt).toLocaleDateString();
+        const address = `${o.addressLine1 || ""}, ${o.city || ""}, ${o.state || ""} ${o.postalCode || ""}`.replace(/,/g, " ");
+        const items = (o.items || []).map(i => `${i.product?.title || "Legacy Item"} (Qty: ${i.quantity}, Size: ${i.size})`).join(" | ");
+        return [
+          o.id,
+          date,
+          o.status,
+          o.totalAmount,
+          `${o.user?.firstName || ""} ${o.user?.lastName || ""}`,
+          o.user?.email || "",
+          o.user?.phone || "",
+          address,
+          items
+        ].map(col => `"${String(col || "").replace(/"/g, '""')}"`).join(",");
+      });
+
+      const csvContent = [headers.join(","), ...rows].join("\n");
+      const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.setAttribute("href", url);
+      link.setAttribute("download", `cityfashion_orders_${new Date().toISOString().split('T')[0]}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } catch (err) {
+      alert("Failed to export: " + err.message);
+    } finally {
+      setStatus((prev) => ({ ...prev, loading: false }));
+    }
+  };
+
   return (
     <div className="page-stack admin-animate">
       <section className="section-header border-b border-slate-100 pb-8 mb-4 flex-col lg:flex-row items-start lg:items-end gap-6">
-        <div className="flex-1">
-          <h1 className="text-3xl font-extrabold tracking-tight text-slate-900">Orders</h1>
-          <p className="text-slate-500 mt-1">Monitor and fulfill customer acquisitions.</p>
+        <div className="flex-1 flex justify-between items-end">
+          <div>
+            <h1 className="text-3xl font-extrabold tracking-tight text-slate-900">Orders</h1>
+            <p className="text-slate-500 mt-1">Monitor and fulfill customer acquisitions.</p>
+          </div>
+          <button 
+            onClick={handleExportExcel}
+            disabled={status.loading}
+            className="flex items-center gap-2 px-4 py-2 bg-indigo-50 text-indigo-600 rounded-xl font-bold text-xs uppercase tracking-widest hover:bg-indigo-100 hover:text-indigo-700 transition-colors disabled:opacity-50"
+          >
+            <Download size={14} />
+            Export CSV
+          </button>
         </div>
         
         <div className="flex flex-col gap-4 w-full lg:w-auto">

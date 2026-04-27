@@ -132,7 +132,7 @@ export default function AdminProductForm({ mode = "edit" }) {
   };
 
   const addVariant = () => {
-    setForm((prev) => ({ ...prev, variants: [...prev.variants, { size: "", color: "Default", stock: 0 }] }));
+    setForm((prev) => ({ ...prev, variants: [...prev.variants, { size: "", stock: 0 }] }));
   };
 
   const updateVariant = (index, field, value) => {
@@ -219,7 +219,7 @@ export default function AdminProductForm({ mode = "edit" }) {
       description: form.description.trim(),
       price,
       compareAtPrice: form.compareAtPrice ? Number(form.compareAtPrice) : null,
-      variants: form.variants,
+      variants: form.variants.map(v => ({ size: v.size, stock: Number(v.stock) || 0 })),
       active: Boolean(form.active),
       categoryId: form.categoryId ? Number(form.categoryId) : undefined,
       instagramLink: form.instagramLink ? form.instagramLink.trim() : null,
