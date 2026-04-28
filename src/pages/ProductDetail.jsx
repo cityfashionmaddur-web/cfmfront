@@ -17,6 +17,21 @@ const ShareIcon = () => (
   </svg>
 );
 
+const sizeOrder = ["XXS", "XS", "S", "M", "L", "XL", "XXL", "2XL", "3XL", "4XL", "5XL", "ONE SIZE"];
+const sortSizes = (sizes) => {
+  return [...sizes].sort((a, b) => {
+    const indexA = sizeOrder.indexOf(a.toUpperCase());
+    const indexB = sizeOrder.indexOf(b.toUpperCase());
+    if (indexA !== -1 && indexB !== -1) return indexA - indexB;
+    if (indexA !== -1) return -1;
+    if (indexB !== -1) return 1;
+    const numA = parseFloat(a);
+    const numB = parseFloat(b);
+    if (!isNaN(numA) && !isNaN(numB)) return numA - numB;
+    return a.localeCompare(b);
+  });
+};
+
 export default function ProductDetail() {
   const { slug } = useParams();
   const navigate = useNavigate();
@@ -64,11 +79,11 @@ export default function ProductDetail() {
   );
 
   const hasVariants = !product?.isCombo && product?.variants && product.variants.length > 0;
-  const uniqueSizes = useMemo(() => Array.from(new Set(product?.variants?.map(v => v.size) || [])), [product]);
+  const uniqueSizes = useMemo(() => sortSizes(Array.from(new Set(product?.variants?.map(v => v.size) || []))), [product]);
   const availableColors = useMemo(() => product?.variants?.filter(v => v.size === selectedSize) || [], [product, selectedSize]);
 
-  const comboTopSizesList = useMemo(() => product?.comboTopSizes ? Object.keys(product.comboTopSizes) : [], [product]);
-  const comboBottomSizesList = useMemo(() => product?.comboBottomSizes ? Object.keys(product.comboBottomSizes) : [], [product]);
+  const comboTopSizesList = useMemo(() => product?.comboTopSizes ? sortSizes(Object.keys(product.comboTopSizes)) : [], [product]);
+  const comboBottomSizesList = useMemo(() => product?.comboBottomSizes ? sortSizes(Object.keys(product.comboBottomSizes)) : [], [product]);
 
   // When size changes, clear color or auto-select if only one
   useEffect(() => {

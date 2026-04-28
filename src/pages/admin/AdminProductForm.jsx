@@ -173,7 +173,7 @@ export default function AdminProductForm({ mode = "edit" }) {
 
   const fillPattern = (pattern) => {
     let sizes = [];
-    if (pattern === "letters") sizes = ["S", "M", "L", "XL", "XXL", "3XL"];
+    if (pattern === "letters") sizes = ["S", "M", "L", "XL", "XXL", "3XL", "4XL", "5XL"];
     if (pattern === "waist") sizes = ["28", "30", "32", "34", "36", "38", "40"];
     if (pattern === "large") sizes = ["50", "55", "60", "65", "70", "75", "80"];
     
@@ -546,7 +546,7 @@ export default function AdminProductForm({ mode = "edit" }) {
              ) : (
                <>
                  <div className="flex flex-wrap gap-2 mb-6">
-                   <button type="button" onClick={() => fillPattern('letters')} className="px-3 py-1.5 rounded-xl border border-white/10 text-white/60 text-[10px] font-black uppercase tracking-widest hover:border-white/30 hover:text-white transition-all">S-3XL</button>
+                   <button type="button" onClick={() => fillPattern('letters')} className="px-3 py-1.5 rounded-xl border border-white/10 text-white/60 text-[10px] font-black uppercase tracking-widest hover:border-white/30 hover:text-white transition-all">S-5XL</button>
                    <button type="button" onClick={() => fillPattern('waist')} className="px-3 py-1.5 rounded-xl border border-white/10 text-white/60 text-[10px] font-black uppercase tracking-widest hover:border-white/30 hover:text-white transition-all">28-40</button>
                    <button type="button" onClick={() => fillPattern('large')} className="px-3 py-1.5 rounded-xl border border-white/10 text-white/60 text-[10px] font-black uppercase tracking-widest hover:border-white/30 hover:text-white transition-all">50-80</button>
                  </div>
