@@ -41,7 +41,7 @@ export default function HeroCarousel({ slides = [] }) {
                <img
                   src={slide.image}
                   alt={slide.title || "Latest Arrivals"}
-                  className="h-full w-full object-contain sm:object-cover object-center"
+                  className="h-full w-full object-cover object-center"
                   style={{ 
                     transform: idx === active ? "scale(1.00)" : "scale(1.05)", 
                     transition: "transform 10s ease-out" 
@@ -66,7 +66,7 @@ export default function HeroCarousel({ slides = [] }) {
               <img
                 src={slide.image}
                 alt={slide.title || "Latest Arrivals"}
-                className="h-full w-full object-contain sm:object-cover object-center"
+                className="h-full w-full object-cover object-center"
                 style={{ 
                   transform: idx === active ? "scale(1.00)" : "scale(1.05)", 
                   transition: "transform 10s ease-out" 
