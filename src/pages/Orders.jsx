@@ -95,15 +95,18 @@ export default function Orders() {
                 {/* Order Summary & Status Header */}
                 <div className="lg:w-1/3 bg-neutral-50 p-8 flex flex-col justify-between border-b lg:border-b-0 lg:border-r border-gray-200">
                    <div>
-                     <div className="flex items-center gap-3 mb-6">
-                       <span className={`inline-flex items-center gap-2 px-3 py-1 text-xs font-black uppercase tracking-widest ${
-                          order.status === "CANCELLED" ? "bg-red-50 text-red-600" : "bg-black text-white"
-                       }`}>
-                         {getStatusIcon(order.status)}
-                         {order.status === "CANCELLED" && order.paymentMethod === "razorpay"
-                           ? "FAILED"
-                           : order.status}
-                       </span>
+                     <div className="mb-6">
+                       <div className="flex items-center gap-3 mb-2">
+                         <span className={`inline-flex items-center gap-2 px-3 py-1 text-xs font-black uppercase tracking-widest ${
+                            order.status === "CANCELLED" ? "bg-red-50 text-red-600" : "bg-black text-white"
+                         }`}>
+                           {getStatusIcon(order.status)}
+                           {order.status === "CANCELLED" && order.paymentMethod === "razorpay"
+                             ? "FAILED"
+                             : order.status}
+                         </span>
+                       </div>
+                       <p className="text-[10px] text-gray-400 uppercase tracking-widest">Your order timeline status will be updated here</p>
                      </div>
                      <p className="text-3xl font-black tracking-tight mb-2">#{order.id.toString().padStart(5, '0')}</p>
                      <p className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-6">Placed on {formatDate(order.createdAt)}</p>
