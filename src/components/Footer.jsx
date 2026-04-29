@@ -12,7 +12,7 @@ export default function Footer() {
           {/* Brand Information (Takes up 4 cols) */}
           <div className="lg:col-span-4 space-y-8">
             <Link to="/" className="inline-flex items-center gap-4 text-2xl font-black uppercase tracking-[0.2em] font-heading">
-              <span className="text-white">CityFashion</span>
+              <span className="text-white">cityfashion Maddur</span>
             </Link>
             <p className="text-gray-400 leading-relaxed max-w-sm text-sm font-medium">
               Curated silhouettes and modern essentials for the city wardrobe. Designed for the contemporary minimalist.
@@ -57,7 +57,7 @@ export default function Footer() {
         {/* Bottom Section: Copyright & Social */}
         <div className="pt-10 border-t border-gray-800 flex flex-col md:flex-row justify-between items-center gap-6">
           <div className="text-[10px] font-bold uppercase tracking-[0.2em] text-gray-500">
-            &copy; {new Date().getFullYear()} CITYFASHION. All rights reserved.
+            &copy; {new Date().getFullYear()} cityfashion Maddur. All rights reserved.
           </div>
 
           <div className="flex gap-6">

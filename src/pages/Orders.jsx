@@ -66,9 +66,6 @@ export default function Orders() {
           <h1 className="text-5xl font-black uppercase tracking-tighter mb-2">Order Archive</h1>
           <p className="text-gray-500 tracking-wide">A comprehensive record of your acquisitions.</p>
         </div>
-        <div className="text-sm font-bold uppercase tracking-widest text-gray-400">
-          Client: {user?.name || "Guest"}
-        </div>
       </div>
 
       {error && (
@@ -122,10 +119,16 @@ export default function Orders() {
                            <span className="font-black tracking-wide">{order.trackingCode}</span>
                          </div>
                        )}
-                       <div className="flex justify-between pb-2">
+                       <div className={`flex justify-between ${order.paymentId ? 'border-b border-gray-200 pb-2 mb-2' : 'pb-2'}`}>
                          <span className="font-bold text-gray-500">Payment</span>
                          <span className="font-black tracking-wide uppercase">{order.paymentMethod || "razorpay"}</span>
                        </div>
+                       {order.paymentId && (
+                         <div className="flex justify-between pb-2">
+                           <span className="font-bold text-gray-500">Payment ID</span>
+                           <span className="font-black tracking-wide text-xs truncate max-w-[150px]" title={order.paymentId}>{order.paymentId}</span>
+                         </div>
+                       )}
                      </div>
 
                      {(order.addressLine1 || order.city) && (

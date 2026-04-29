@@ -87,7 +87,7 @@ export default function NavBar() {
                   className="h-10 w-10 object-contain hidden sm:block"
                 />
                 <span className="sm:pl-3 text-sm md:text-base font-black tracking-[0.2em] uppercase leading-none">
-                  CityFashion
+                  cityfashion Maddur
                 </span>
               </Link>
             </div>
