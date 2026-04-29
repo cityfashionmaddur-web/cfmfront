@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
-import { adminGet, adminPut } from "../../utils/adminApi.js";
+import { adminGet, adminPut, adminPost } from "../../utils/adminApi.js";
 import { formatDate, formatPrice } from "../../utils/format.js";
 import { 
   ArrowLeft, 
@@ -18,7 +18,8 @@ import {
   Mail,
   Hash,
   ChevronRight,
-  Package
+  Package,
+  RefreshCw
 } from "lucide-react";
 
 const STATUS_OPTIONS = ["PENDING", "PAID", "SHIPPED", "DELIVERED", "CANCELLED"];
@@ -34,7 +35,7 @@ const STATUS_ICONS = {
 export default function AdminOrderDetail() {
   const { id } = useParams();
   const [order, setOrder] = useState(null);
-  const [status, setStatus] = useState({ loading: false, error: "", saving: false });
+  const [status, setStatus] = useState({ loading: false, error: "", saving: false, verifying: false });
   const [nextStatus, setNextStatus] = useState("");
   const [trackingDraft, setTrackingDraft] = useState({ trackingCode: "", trackingCarrier: "" });
 
@@ -92,6 +93,23 @@ export default function AdminOrderDetail() {
       setStatus((prev) => ({ ...prev, error: err.message || "Failed to update tracking." }));
     } finally {
       setStatus((prev) => ({ ...prev, saving: false }));
+    }
+  };
+
+  const handleVerifyPayment = async () => {
+    if (!order) return;
+    setStatus((prev) => ({ ...prev, verifying: true, error: "" }));
+    try {
+      const res = await adminPost(`/payments/razorpay/verify/${order.id}`);
+      if (res.status) {
+        setOrder((prev) => ({ ...prev, status: res.status }));
+        setNextStatus(res.status);
+      }
+      alert(res.message || "Verification finished");
+    } catch (err) {
+      setStatus((prev) => ({ ...prev, error: err.message || "Failed to verify payment." }));
+    } finally {
+      setStatus((prev) => ({ ...prev, verifying: false }));
     }
   };
 
@@ -343,6 +361,23 @@ export default function AdminOrderDetail() {
                       </div>
                    </div>
                 </div>
+
+                 {(order.paymentId || order.razorpayOrderId) && !['PAID', 'DELIVERED', 'SHIPPED', 'CANCELLED'].includes(order.status) && (
+                   <div className="pt-2 pb-2">
+                     <button
+                       onClick={handleVerifyPayment}
+                       disabled={status.verifying}
+                       className="w-full btn bg-slate-900 text-white hover:bg-black py-3 rounded-2xl shadow-md transition-all font-black text-[10px] uppercase tracking-widest disabled:opacity-50 flex items-center justify-center gap-2"
+                     >
+                       {status.verifying ? (
+                         <RefreshCw size={14} className="animate-spin" />
+                       ) : (
+                         <RefreshCw size={14} />
+                       )}
+                       {status.verifying ? "VERIFYING..." : "VERIFY PAYMENT"}
+                     </button>
+                   </div>
+                 )}
 
                 {(order.paymentErrorCode || order.paymentErrorDescription) && (
                   <div className="p-4 rounded-2xl bg-red-50 border border-red-100">
